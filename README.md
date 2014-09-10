@@ -30,7 +30,7 @@ The **encoding** option is ignored if **data** is a buffer. It defaults to 'utf8
 Example:
 
 ```javascript
-fs.writeFile('message.txt', 'Hello Node', {chown:{uid:100,gid:50}}, function (err) {
+writeFileAtomic('message.txt', 'Hello Node', {chown:{uid:100,gid:50}}, function (err) {
   if (err) throw err;
   console.log('It\'s saved!');
 });
