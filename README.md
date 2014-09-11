@@ -2,10 +2,7 @@ write-file-atomic
 -----------------
 
 This is an extension for node's `fs.writeFile` that makes its operation
-atomic allows you to include uid/gid for the final file as well.  It does
-this by initially writing to a temporary file (your filename, followed by
-".writeFile.atomic"), chowning it to the uid and gid you specified (if you
-specified any) and finally renames it to your filename.
+atomic allows you to include uid/gid for the final file as well.
 
 ### var writeFileAtomic = require('write-file-atomic')<br>writeFileAtomic(filename, data, [options], callback)
 
@@ -21,6 +18,12 @@ callback **Function**
 
 Atomically and asynchronously writes data to a file, replacing the file if it already
 exists.  data can be a string or a buffer.
+
+The file is initially named `filename + "." + md5hex(__filename, process.pid, ++invocations)`.
+If writeFile completes successfully then, if passed the **chown** option it will change
+the ownership of the file. Finally it renames the file back to the filename you specified. If
+it encounters errors at any of these steps it will attempt to unlink the temporary file and then
+pass the error back to the caller.
 
 If provided, the **chown** option requires both **uid** and **gid** properties or else
 you'll get an error.
