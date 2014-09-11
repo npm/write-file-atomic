@@ -2,7 +2,7 @@ write-file-atomic
 -----------------
 
 This is an extension for node's `fs.writeFile` that makes its operation
-atomic allows you to include uid/gid for the final file as well.
+atomic and allows you set ownership (uid/gid of the file).
 
 ### var writeFileAtomic = require('write-file-atomic')<br>writeFileAtomic(filename, data, [options], callback)
 
