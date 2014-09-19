@@ -1,8 +1,7 @@
 "use strict";
 var test = require('tap').test;
 var requireInject = require('require-inject');
-var writeFileAtomic = requireInject('../index', {
-    fs: {
+var injectFs = {
         writeFile: function (tmpfile, data, options, cb) {
             if (/nowrite/.test(tmpfile)) return cb('ENOWRITE');
             cb();
@@ -32,6 +31,9 @@ var writeFileAtomic = requireInject('../index', {
             if (/nounlink/.test(tmpfile)) throw 'ENOUNLINK';
         },
     }
+var writeFileAtomic = requireInject('../index', {
+    fs: injectFs,
+    'graceful-fs': injectFs
 });
 var writeFileAtomicSync = writeFileAtomic.sync;
 
