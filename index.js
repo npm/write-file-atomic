@@ -10,7 +10,11 @@ var md5hex = function () {
 }
 var invocations = 0;
 var getTmpname = function (filename) {
-    return filename + "." + md5hex(__filename, process.pid, ++invocations)
+	var isWin = /^win/.test(process.platform)
+	if(isWin){
+		return filename + ".tmp";
+	}
+    return filename + "." + md5hex(__filename, process.pid, ++invocations);
 }
 
 module.exports = function writeFile(filename, data, options, callback) {
