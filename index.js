@@ -1,16 +1,18 @@
 'use strict'
 var fs = require('graceful-fs');
 var chain = require('slide').chain;
-var crypto = require('crypto');
+var MurmurHash3 = require('imurmurhash');
 
-var md5hex = function () {
-    var hash = crypto.createHash('md5');
-    for (var ii=0; ii<arguments.length; ++ii) hash.update(''+arguments[ii])
-    return hash.digest('hex')
+function murmurhex () {
+  var hash = MurmurHash3('');
+  for (var ii=0; ii<arguments.length; ++ii) {
+    hash.hash(hash+arguments[ii]);
+  }
+  return hash.result();
 }
 var invocations = 0;
 var getTmpname = function (filename) {
-    return filename + "." + md5hex(__filename, process.pid, ++invocations)
+    return filename + "." + murmurhex(__filename, process.pid, ++invocations)
 }
 
 module.exports = function writeFile(filename, data, options, callback) {
