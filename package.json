@@ -4,7 +4,7 @@
   "description": "Write files in an atomic fashion w/configurable ownership",
   "main": "index.js",
   "scripts": {
-    "test": "tap test/*.js"
+    "test": "standard && tap test/*.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "require-inject": "^1.1.0",
+    "standard": "^5.4.1",
     "tap": "^0.4.12"
   }
 }
