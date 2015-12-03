@@ -22,6 +22,7 @@
   "homepage": "https://github.com/iarna/write-file-atomic",
   "dependencies": {
     "graceful-fs": "^4.1.2",
+    "imurmurhash": "^0.1.4",
     "slide": "^1.1.5"
   },
   "devDependencies": {
