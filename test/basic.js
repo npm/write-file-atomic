@@ -11,6 +11,10 @@ var writeFileAtomic = requireInject('../index', {
       if (/nochown/.test(tmpfile)) return cb(new Error('ENOCHOWN'))
       cb()
     },
+    chmod: function (tmpfile, mode, cb) {
+      if (/nochmod/.test(tmpfile)) return cb(new Error('ENOCHMOD'))
+      cb()
+    },
     rename: function (tmpfile, filename, cb) {
       if (/norename/.test(tmpfile)) return cb(new Error('ENORENAME'))
       cb()
@@ -19,17 +23,27 @@ var writeFileAtomic = requireInject('../index', {
       if (/nounlink/.test(tmpfile)) return cb(new Error('ENOUNLINK'))
       cb()
     },
+    stat: function (tmpfile, cb) {
+      if (/nostat/.test(tmpfile)) return cb(new Error('ENOSTAT'))
+      cb()
+    },
     writeFileSync: function (tmpfile, data, options) {
       if (/nowrite/.test(tmpfile)) throw new Error('ENOWRITE')
     },
     chownSync: function (tmpfile, uid, gid) {
       if (/nochown/.test(tmpfile)) throw new Error('ENOCHOWN')
     },
+    chmodSync: function (tmpfile, mode) {
+      if (/nochmod/.test(tmpfile)) throw new Error('ENOCHMOD')
+    },
     renameSync: function (tmpfile, filename) {
       if (/norename/.test(tmpfile)) throw new Error('ENORENAME')
     },
     unlinkSync: function (tmpfile) {
       if (/nounlink/.test(tmpfile)) throw new Error('ENOUNLINK')
+    },
+    statSync: function (tmpfile) {
+      if (/nostat/.test(tmpfile)) throw new Error('ENOSTAT')
     }
   }
 })
