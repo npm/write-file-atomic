@@ -4,14 +4,9 @@ var chain = require('slide').chain
 var MurmurHash3 = require('imurmurhash')
 var extend = Object.assign || require('util')._extend
 
-function murmurhex () {
-  var hash = new MurmurHash3()
-  for (var ii = 0; ii < arguments.length; ++ii) hash.hash('' + arguments[ii])
-  return hash.result()
-}
 var invocations = 0
 var getTmpname = function (filename) {
-  return filename + '.' + murmurhex(__filename, process.pid, ++invocations)
+  return filename + '.' + MurmurHash3(__filename).hash(process.pid).hash(++invocations).result()
 }
 
 module.exports = function writeFile (filename, data, options, callback) {
@@ -28,11 +23,13 @@ module.exports = function writeFile (filename, data, options, callback) {
     // Either mode or chown is not explicitly set
     // Default behavior is to copy it from original file
     return fs.stat(filename, function (err, stats) {
+      if (err || !stats) return thenWriteFile()
+
       options = extend({}, options)
-      if (!err && stats && !options.mode) {
+      if (!options.mode) {
         options.mode = stats.mode
       }
-      if (!err && stats && !options.chown && process.getuid) {
+      if (!options.chown && process.getuid) {
         options.chown = { uid: stats.uid, gid: stats.gid }
       }
       return thenWriteFile()
@@ -62,7 +59,6 @@ module.exports.sync = function writeFileSync (filename, data, options) {
       // Default behavior is to copy it from original file
       try {
         var stats = fs.statSync(filename)
-
         options = extend({}, options)
         if (!options.mode) {
           options.mode = stats.mode

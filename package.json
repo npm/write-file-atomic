@@ -21,15 +21,16 @@
   },
   "homepage": "https://github.com/iarna/write-file-atomic",
   "dependencies": {
-    "graceful-fs": "^4.1.2",
+    "graceful-fs": "^4.1.11",
     "imurmurhash": "^0.1.4",
     "slide": "^1.1.5"
   },
   "devDependencies": {
-    "require-inject": "^1.1.0",
+    "mkdirp": "^0.5.1",
+    "require-inject": "^1.4.0",
+    "rimraf": "^2.5.4",
     "standard": "^5.4.1",
-    "tap": "^2.3.1",
-    "tmp": "0.0.28"
+    "tap": "^2.3.1"
   },
   "files": [
     "index.js"
