@@ -15,6 +15,11 @@ module.exports = function writeFile (filename, data, options, callback) {
     options = null
   }
   if (!options) options = {}
+  fs.realpath(filename, function (_, realname) {
+    _writeFile(realname || filename, data, options, callback)
+  })
+}
+function _writeFile (filename, data, options, callback) {
   var tmpfile = getTmpname(filename)
 
   if (options.mode && options.chown) {
@@ -51,6 +56,11 @@ module.exports = function writeFile (filename, data, options, callback) {
 
 module.exports.sync = function writeFileSync (filename, data, options) {
   if (!options) options = {}
+  try {
+    filename = fs.realpathSync(filename)
+  } catch (ex) {
+    // it's ok, it'll happen on a not yet existing file
+  }
   var tmpfile = getTmpname(filename)
 
   try {

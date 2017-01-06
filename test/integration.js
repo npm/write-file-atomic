@@ -84,6 +84,20 @@ test('writes simple file (async)', function (t) {
   })
 })
 
+test('writes to symlinks without clobbering (async)', function (t) {
+  t.plan(5)
+  var file = tmpFile()
+  var link = tmpFile()
+  fs.writeFileSync(file, '42')
+  fs.symlinkSync(file, link)
+  didWriteFileAtomic(t, currentUser(), link, '43', function (err) {
+    t.ifError(err, 'no error')
+    t.is(readFile(file), '43', 'target content ok')
+    t.is(readFile(link), '43', 'link content ok')
+    t.ok(fs.lstatSync(link).isSymbolicLink(), 'link is link')
+  })
+})
+
 test('runs chown on given file (async)', function (t) {
   var file = tmpFile()
   didWriteFileAtomic(t, {uid: 42, gid: 43}, file, '42', { chown: { uid: 42, gid: 43 } }, function (err) {
@@ -154,6 +168,18 @@ test('writes simple file (sync)', function (t) {
   var file = tmpFile()
   didWriteFileAtomicSync(t, {}, file, '42')
   t.is(readFile(file), '42')
+})
+
+test('writes to symlinks without clobbering (sync)', function (t) {
+  t.plan(4)
+  var file = tmpFile()
+  var link = tmpFile()
+  fs.writeFileSync(file, '42')
+  fs.symlinkSync(file, link)
+  didWriteFileAtomicSync(t, currentUser(), link, '43')
+  t.is(readFile(file), '43', 'target content ok')
+  t.is(readFile(link), '43', 'link content ok')
+  t.ok(fs.lstatSync(link).isSymbolicLink(), 'link is link')
 })
 
 test('runs chown on given file (sync)', function (t) {

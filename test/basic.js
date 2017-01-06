@@ -3,6 +3,9 @@ var test = require('tap').test
 var requireInject = require('require-inject')
 var writeFileAtomic = requireInject('../index', {
   'graceful-fs': {
+    realpath: function (filename, cb) {
+      return cb(null, filename)
+    },
     writeFile: function (tmpfile, data, options, cb) {
       if (/nowrite/.test(tmpfile)) return cb(new Error('ENOWRITE'))
       cb()
@@ -26,6 +29,9 @@ var writeFileAtomic = requireInject('../index', {
     stat: function (tmpfile, cb) {
       if (/nostat/.test(tmpfile)) return cb(new Error('ENOSTAT'))
       cb()
+    },
+    realpathSync: function (filename, cb) {
+      return filename
     },
     writeFileSync: function (tmpfile, data, options) {
       if (/nowrite/.test(tmpfile)) throw new Error('ENOWRITE')
