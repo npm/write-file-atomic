@@ -1,9 +1,5 @@
 language: node_js
-sudo: true
-before_install:
-  - "npm -g install npm"
-script:
-  - "sudo $(which node) $(which npm) test"
+sudo: false
 os:
   - osx
   - linux
@@ -12,8 +8,6 @@ matrix:
   allow_failures:
     - os: osx
 node_js:
-  - "4"
   - "6"
-  - "0.10"
-  - "5"
-  - "0.12"
+  - "7"
+  - "4"
