@@ -22,7 +22,7 @@ module.exports = function writeFile (filename, data, options, callback) {
   if (!options) options = {}
   var tmpfile = getTmpname(filename)
 
-  if (options.mode && options.chmod) {
+  if (options.mode && options.chown) {
     return thenWriteFile()
   } else {
     // Either mode or chown is not explicitly set
@@ -57,7 +57,7 @@ module.exports.sync = function writeFileSync (filename, data, options) {
   var tmpfile = getTmpname(filename)
 
   try {
-    if (!options.mode || !options.chmod) {
+    if (!options.mode || !options.chown) {
       // Either mode or chown is not explicitly set
       // Default behavior is to copy it from original file
       try {
