@@ -1,15 +1,23 @@
 'use strict'
+module.exports = writeFile
+module.exports.sync = writeFileSync
+module.exports._getTmpname = getTmpname // for testing
+
 var fs = require('graceful-fs')
 var chain = require('slide').chain
 var MurmurHash3 = require('imurmurhash')
 var extend = Object.assign || require('util')._extend
 
 var invocations = 0
-var getTmpname = function (filename) {
-  return filename + '.' + MurmurHash3(__filename).hash(process.pid).hash(++invocations).result()
+function getTmpname (filename) {
+  return filename + '.' +
+    MurmurHash3(__filename)
+      .hash(String(process.pid))
+      .hash(String(++invocations))
+      .result()
 }
 
-module.exports = function writeFile (filename, data, options, callback) {
+function writeFile (filename, data, options, callback) {
   if (options instanceof Function) {
     callback = options
     options = null
@@ -54,7 +62,7 @@ function _writeFile (filename, data, options, callback) {
   }
 }
 
-module.exports.sync = function writeFileSync (filename, data, options) {
+function writeFileSync (filename, data, options) {
   if (!options) options = {}
   try {
     filename = fs.realpathSync(filename)

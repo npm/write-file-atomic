@@ -55,6 +55,14 @@ var writeFileAtomic = requireInject('../index', {
 })
 var writeFileAtomicSync = writeFileAtomic.sync
 
+test('getTmpname', function (t) {
+  var getTmpname = writeFileAtomic._getTmpname
+  var a = getTmpname('abc.def')
+  var b = getTmpname('abc.def')
+  t.notEqual(a, b, 'different invocations of getTmpname get different results')
+  t.done()
+})
+
 test('async tests', function (t) {
   t.plan(7)
   writeFileAtomic('good', 'test', {mode: '0777'}, function (err) {
