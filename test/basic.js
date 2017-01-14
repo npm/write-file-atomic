@@ -10,6 +10,10 @@ var writeFileAtomic = requireInject('../index', {
       if (/nowrite/.test(tmpfile)) return cb(new Error('ENOWRITE'))
       cb()
     },
+    open: function (tmpfile, options, cb) {
+      if (/nowrite/.test(tmpfile)) return cb(new Error('ENOWRITE'))
+      cb()
+    },
     chown: function (tmpfile, uid, gid, cb) {
       if (/nochown/.test(tmpfile)) return cb(new Error('ENOCHOWN'))
       cb()
@@ -36,6 +40,12 @@ var writeFileAtomic = requireInject('../index', {
     writeFileSync: function (tmpfile, data, options) {
       if (/nowrite/.test(tmpfile)) throw new Error('ENOWRITE')
     },
+    openSync: function (tmpfile, options) {
+      if (/nowrite/.test(tmpfile)) throw new Error('ENOWRITE')
+    },
+    writeSync: function () { },
+    fsyncSync: function () { },
+    closeSync: function () { },
     chownSync: function (tmpfile, uid, gid) {
       if (/nochown/.test(tmpfile)) throw new Error('ENOCHOWN')
     },
@@ -72,19 +82,19 @@ test('async tests', function (t) {
     t.notOk(err, 'No errors occur when NOT passing in options')
   })
   writeFileAtomic('nowrite', 'test', function (err) {
-    t.is(err.message, 'ENOWRITE', 'writeFile failures propagate')
+    t.is(err && err.message, 'ENOWRITE', 'writeFile failures propagate')
   })
   writeFileAtomic('nochown', 'test', {chown: {uid: 100, gid: 100}}, function (err) {
-    t.is(err.message, 'ENOCHOWN', 'Chown failures propagate')
+    t.is(err && err.message, 'ENOCHOWN', 'Chown failures propagate')
   })
   writeFileAtomic('nochown', 'test', function (err) {
     t.notOk(err, 'No attempt to chown when no uid/gid passed in')
   })
   writeFileAtomic('norename', 'test', function (err) {
-    t.is(err.message, 'ENORENAME', 'Rename errors propagate')
+    t.is(err && err.message, 'ENORENAME', 'Rename errors propagate')
   })
   writeFileAtomic('norename nounlink', 'test', function (err) {
-    t.is(err.message, 'ENORENAME', 'Failure to unlink the temp file does not clobber the original error')
+    t.is(err && err.message, 'ENORENAME', 'Failure to unlink the temp file does not clobber the original error')
   })
 })
 
@@ -93,12 +103,12 @@ test('sync tests', function (t) {
   var throws = function (shouldthrow, msg, todo) {
     var err
     try { todo() } catch (e) { err = e }
-    t.is(shouldthrow, err.message, msg)
+    t.is(shouldthrow, err && err.message, msg)
   }
   var noexception = function (msg, todo) {
     var err
     try { todo() } catch (e) { err = e }
-    t.notOk(err, msg)
+    t.ifError(err, msg)
   }
 
   noexception('No errors occur when passing in options', function () {

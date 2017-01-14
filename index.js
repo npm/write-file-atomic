@@ -89,7 +89,10 @@ function writeFileSync (filename, data, options) {
       }
     }
 
-    fs.writeFileSync(tmpfile, data, options.encoding || 'utf8')
+    var fd = fs.openSync(tmpfile, 'w', options.mode)
+    fs.writeSync(fd, data, 0, options.encoding || 'utf8')
+    fs.fsyncSync(fd)
+    fs.closeSync(fd)
     if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
     if (options.mode) fs.chmodSync(tmpfile, options.mode)
     fs.renameSync(tmpfile, filename)
