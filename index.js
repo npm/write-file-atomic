@@ -3,6 +3,7 @@ module.exports = writeFile
 module.exports.sync = writeFileSync
 module.exports._getTmpname = getTmpname // for testing
 
+var ofs = require('fs')
 var fs = require('graceful-fs')
 var chain = require('slide').chain
 var MurmurHash3 = require('imurmurhash')
@@ -89,7 +90,10 @@ function writeFileSync (filename, data, options) {
       }
     }
 
-    fs.writeFileSync(tmpfile, data, options.encoding || 'utf8')
+    var fd = ofs.openSync(tmpfile, 'w', options.mode)
+    ofs.writeSync(fd, data, 0, options.encoding || 'utf8')
+    ofs.fsyncSync(fd)
+    ofs.closeSync(fd)
     if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
     if (options.mode) fs.chmodSync(tmpfile, options.mode)
     fs.renameSync(tmpfile, filename)
