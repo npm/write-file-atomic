@@ -4,7 +4,6 @@ module.exports.sync = writeFileSync
 module.exports._getTmpname = getTmpname // for testing
 
 var fs = require('graceful-fs')
-var chain = require('slide').chain
 var MurmurHash3 = require('imurmurhash')
 var extend = Object.assign || require('util')._extend
 
@@ -50,14 +49,54 @@ function _writeFile (filename, data, options, callback) {
   }
 
   function thenWriteFile () {
-    chain([
-      [fs, fs.writeFile, tmpfile, data, options.encoding || 'utf8'],
-      options.mode && [fs, fs.chmod, tmpfile, options.mode],
-      options.chown && [fs, fs.chown, tmpfile, options.chown.uid, options.chown.gid],
-      [fs, fs.rename, tmpfile, filename]
-    ], function (err) {
-      err ? fs.unlink(tmpfile, function () { callback(err) })
-        : callback()
+    new Promise(function writing (resolve, reject) {
+      fs.writeFile(tmpfile, data, options.encoding || 'utf8', function written (err) {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    }).then(function chmoding () {
+      if (options.mode) {
+        return new Promise(function (resolve, reject) {
+          fs.chmod(tmpfile, options.mode, function chmodded (err) {
+            if (err) {
+              reject(err)
+            } else {
+              resolve()
+            }
+          })
+        })
+      }
+    }).then(function chowning () {
+      if (options.chown) {
+        return new Promise(function (resolve, reject) {
+          fs.chown(tmpfile, options.chown.uid, options.chown.gid, function chowned (err) {
+            if (err) {
+              reject(err)
+            } else {
+              resolve()
+            }
+          })
+        })
+      }
+    }).then(function renaming () {
+      return new Promise(function (resolve, reject) {
+        fs.rename(tmpfile, filename, function renamed (err) {
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
+      })
+    }).then(function success () {
+      callback()
+    }, function failure (err) {
+      fs.unlink(tmpfile, function () {
+        callback(err)
+      })
     })
   }
 }
