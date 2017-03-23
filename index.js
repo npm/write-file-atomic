@@ -22,34 +22,38 @@ function writeFile (filename, data, options, callback) {
     options = null
   }
   if (!options) options = {}
-  fs.realpath(filename, function (_, realname) {
-    _writeFile(realname || filename, data, options, callback)
-  })
-}
-function _writeFile (filename, data, options, callback) {
-  var tmpfile = getTmpname(filename)
-
-  if (options.mode && options.chown) {
-    return thenWriteFile()
-  } else {
-    // Either mode or chown is not explicitly set
-    // Default behavior is to copy it from original file
-    return fs.stat(filename, function (err, stats) {
-      if (err || !stats) return thenWriteFile()
-
-      options = extend({}, options)
-      if (!options.mode) {
-        options.mode = stats.mode
-      }
-      if (!options.chown && process.getuid) {
-        options.chown = { uid: stats.uid, gid: stats.gid }
-      }
-      return thenWriteFile()
+  var tmpfile
+  new Promise(function determineRealPath (resolve) {
+    fs.realpath(filename, function determined (_, realname) {
+      filename = realname || filename
+      tmpfile = getTmpname(filename)
+      resolve()
     })
-  }
-
-  function thenWriteFile () {
-    new Promise(function writing (resolve, reject) {
+  }).then(function getStats () {
+    return new Promise(function (resolve) {
+      if (options.mode && options.chown) {
+        resolve()
+      } else {
+        // Either mode or chown is not explicitly set
+        // Default behavior is to copy it from original file
+        fs.stat(filename, function (err, stats) {
+          if (err || !stats) {
+            resolve()
+          } else {
+            options = extend({}, options)
+            if (!options.mode) {
+              options.mode = stats.mode
+            }
+            if (!options.chown && process.getuid) {
+              options.chown = { uid: stats.uid, git: stats.gid }
+            }
+            resolve()
+          }
+        })
+      }
+    })
+  }).then(function thenWriteFile () {
+    return new Promise(function writing (resolve, reject) {
       fs.writeFile(tmpfile, data, options.encoding || 'utf8', function written (err) {
         if (err) {
           reject(err)
@@ -57,33 +61,11 @@ function _writeFile (filename, data, options, callback) {
           resolve()
         }
       })
-    }).then(function chmoding () {
-      if (options.mode) {
-        return new Promise(function (resolve, reject) {
-          fs.chmod(tmpfile, options.mode, function chmodded (err) {
-            if (err) {
-              reject(err)
-            } else {
-              resolve()
-            }
-          })
-        })
-      }
-    }).then(function chowning () {
-      if (options.chown) {
-        return new Promise(function (resolve, reject) {
-          fs.chown(tmpfile, options.chown.uid, options.chown.gid, function chowned (err) {
-            if (err) {
-              reject(err)
-            } else {
-              resolve()
-            }
-          })
-        })
-      }
-    }).then(function renaming () {
+    })
+  }).then(function chmoding () {
+    if (options.mode) {
       return new Promise(function (resolve, reject) {
-        fs.rename(tmpfile, filename, function renamed (err) {
+        fs.chmod(tmpfile, options.mode, function chmodded (err) {
           if (err) {
             reject(err)
           } else {
@@ -91,14 +73,36 @@ function _writeFile (filename, data, options, callback) {
           }
         })
       })
-    }).then(function success () {
-      callback()
-    }, function failure (err) {
-      fs.unlink(tmpfile, function () {
-        callback(err)
+    }
+  }).then(function chowning () {
+    if (options.chown) {
+      return new Promise(function (resolve, reject) {
+        fs.chown(tmpfile, options.chown.uid, options.chown.gid, function chowned (err) {
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
+      })
+    }
+  }).then(function renaming () {
+    return new Promise(function (resolve, reject) {
+      fs.rename(tmpfile, filename, function renamed (err) {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
       })
     })
-  }
+  }).then(function success () {
+    callback()
+  }, function failure (err) {
+    fs.unlink(tmpfile, function () {
+      callback(err)
+    })
+  })
 }
 
 function writeFileSync (filename, data, options) {
