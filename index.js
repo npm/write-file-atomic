@@ -45,7 +45,7 @@ function writeFile (filename, data, options, callback) {
               options.mode = stats.mode
             }
             if (!options.chown && process.getuid) {
-              options.chown = { uid: stats.uid, git: stats.gid }
+              options.chown = { uid: stats.uid, gid: stats.gid }
             }
             resolve()
           }
