@@ -51,13 +51,28 @@ function _writeFile (filename, data, options, callback) {
 
   function thenWriteFile () {
     chain([
-      [fs, fs.writeFile, tmpfile, data, options.encoding || 'utf8'],
-      options.mode && [fs, fs.chmod, tmpfile, options.mode],
+      [writeFileAsync, tmpfile, data, options.mode, options.encoding || 'utf8'],
       options.chown && [fs, fs.chown, tmpfile, options.chown.uid, options.chown.gid],
+      options.mode && [fs, fs.chmod, tmpfile, options.mode],
       [fs, fs.rename, tmpfile, filename]
     ], function (err) {
       err ? fs.unlink(tmpfile, function () { callback(err) })
         : callback()
+    })
+  }
+
+  // doing this instead of `fs.writeFile` in order to get the ability to
+  // call `fsync`.
+  function writeFileAsync (file, data, mode, encoding, cb) {
+    fs.open(file, 'w', options.mode, function (err, fd) {
+      if (err) return cb(err)
+      fs.write(fd, data, encoding, function (err) {
+        if (err) return cb(err)
+        fs.fsync(fd, function (err) {
+          if (err) return cb(err)
+          fs.close(fd, cb)
+        })
+      })
     })
   }
 }

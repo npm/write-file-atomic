@@ -10,10 +10,13 @@ var writeFileAtomic = requireInject('../index', {
       if (/nowrite/.test(tmpfile)) return cb(new Error('ENOWRITE'))
       cb()
     },
-    open: function (tmpfile, options, cb) {
+    open: function (tmpfile, options, mode, cb) {
       if (/nowrite/.test(tmpfile)) return cb(new Error('ENOWRITE'))
       cb()
     },
+    write: function (fd, data, encoding, cb) { cb() },
+    fsync: function (fd, cb) { cb() },
+    close: function (fd, cb) { cb() },
     chown: function (tmpfile, uid, gid, cb) {
       if (/nochown/.test(tmpfile)) return cb(new Error('ENOCHOWN'))
       cb()
@@ -36,9 +39,6 @@ var writeFileAtomic = requireInject('../index', {
     },
     realpathSync: function (filename, cb) {
       return filename
-    },
-    writeFileSync: function (tmpfile, data, options) {
-      if (/nowrite/.test(tmpfile)) throw new Error('ENOWRITE')
     },
     openSync: function (tmpfile, options) {
       if (/nowrite/.test(tmpfile)) throw new Error('ENOWRITE')
