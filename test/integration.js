@@ -84,6 +84,15 @@ test('writes simple file (async)', function (t) {
   })
 })
 
+test('writes buffers to simple file (async)', function (t) {
+  t.plan(3)
+  var file = tmpFile()
+  didWriteFileAtomic(t, {}, file, Buffer.from('42'), function (err) {
+    t.ifError(err, 'no error')
+    t.is(readFile(file), '42', 'content ok')
+  })
+})
+
 test('writes to symlinks without clobbering (async)', function (t) {
   t.plan(5)
   var file = tmpFile()
@@ -167,6 +176,13 @@ test('writes simple file (sync)', function (t) {
   t.plan(2)
   var file = tmpFile()
   didWriteFileAtomicSync(t, {}, file, '42')
+  t.is(readFile(file), '42')
+})
+
+test('writes simple buffer file (sync)', function (t) {
+  t.plan(2)
+  var file = tmpFile()
+  didWriteFileAtomicSync(t, {}, file, Buffer.from('42'))
   t.is(readFile(file), '42')
 })
 
