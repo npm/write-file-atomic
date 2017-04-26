@@ -14,7 +14,7 @@ var writeFileAtomic = requireInject('../index', {
       if (/nowrite/.test(tmpfile)) return cb(new Error('ENOWRITE'))
       cb()
     },
-    write: function (fd, data, encoding, cb) { cb() },
+    write: function (fd, data, position, encoding, cb) { cb() },
     fsync: function (fd, cb) { cb() },
     close: function (fd, cb) { cb() },
     chown: function (tmpfile, uid, gid, cb) {
