@@ -6,7 +6,6 @@ module.exports._getTmpname = getTmpname // for testing
 var fs = require('graceful-fs')
 var chain = require('slide').chain
 var MurmurHash3 = require('imurmurhash')
-var extend = Object.assign || require('util')._extend
 
 var invocations = 0
 function getTmpname (filename) {
@@ -38,7 +37,7 @@ function _writeFile (filename, data, options, callback) {
     return fs.stat(filename, function (err, stats) {
       if (err || !stats) return thenWriteFile()
 
-      options = extend({}, options)
+      options = Object.assign({}, options)
       if (!options.mode) {
         options.mode = stats.mode
       }
@@ -99,7 +98,7 @@ function writeFileSync (filename, data, options) {
       // Default behavior is to copy it from original file
       try {
         var stats = fs.statSync(filename)
-        options = extend({}, options)
+        options = Object.assign({}, options)
         if (!options.mode) {
           options.mode = stats.mode
         }

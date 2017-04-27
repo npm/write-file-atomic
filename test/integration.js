@@ -5,7 +5,6 @@ var test = require('tap').test
 var mkdirp = require('mkdirp')
 var rimraf = require('rimraf')
 var requireInject = require('require-inject')
-var extend = Object.assign || require('util')._extend
 
 var workdir = path.join(__dirname, path.basename(__filename, '.js'))
 var testfiles = 0
@@ -25,7 +24,7 @@ function didWriteFileAtomic (t, expected, filename, data, options, callback) {
   if (!options) options = {}
   var actual = {}
   var writeFileAtomic = requireInject('../index.js', {
-    'graceful-fs': extend(extend({}, fs), {
+    'graceful-fs': Object.assign({}, fs, {
       chown: function mockChown (filename, uid, gid, cb) {
         actual.uid = uid
         actual.gid = gid
@@ -34,7 +33,7 @@ function didWriteFileAtomic (t, expected, filename, data, options, callback) {
       stat: function mockStat (filename, cb) {
         fs.stat(filename, function (err, stats) {
           if (err) return cb(err)
-          cb(null, extend(stats, expected || {}))
+          cb(null, Object.assign(stats, expected || {}))
         })
       }
     })
@@ -48,14 +47,14 @@ function didWriteFileAtomic (t, expected, filename, data, options, callback) {
 function didWriteFileAtomicSync (t, expected, filename, data, options) {
   var actual = {}
   var writeFileAtomic = requireInject('../index.js', {
-    'graceful-fs': extend(extend({}, fs), {
+    'graceful-fs': Object.assign({}, fs, {
       chownSync: function mockChownSync (filename, uid, gid) {
         actual.uid = uid
         actual.gid = gid
       },
       statSync: function mockStatSync (filename) {
         var stats = fs.statSync(filename)
-        return extend(stats, expected || {})
+        return Object.assign(stats, expected || {})
       }
     })
   })
@@ -85,14 +84,10 @@ test('writes simple file (async)', function (t) {
   })
 })
 
-function createBuffer (str) {
-  return Buffer.from ? Buffer.from(str) : new Buffer(str)
-}
-
 test('writes buffers to simple file (async)', function (t) {
   t.plan(3)
   var file = tmpFile()
-  didWriteFileAtomic(t, {}, file, createBuffer('42'), function (err) {
+  didWriteFileAtomic(t, {}, file, Buffer.from('42'), function (err) {
     t.ifError(err, 'no error')
     t.is(readFile(file), '42', 'content ok')
   })
@@ -187,7 +182,7 @@ test('writes simple file (sync)', function (t) {
 test('writes simple buffer file (sync)', function (t) {
   t.plan(2)
   var file = tmpFile()
-  didWriteFileAtomicSync(t, {}, file, createBuffer('42'))
+  didWriteFileAtomicSync(t, {}, file, Buffer.from('42'))
   t.is(readFile(file), '42')
 })
 
