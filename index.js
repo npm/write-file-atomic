@@ -6,6 +6,7 @@ module.exports._getTmpname = getTmpname // for testing
 var fs = require('graceful-fs')
 var chain = require('slide').chain
 var MurmurHash3 = require('imurmurhash')
+var onExit = require('signal-exit')
 
 var invocations = 0
 function getTmpname (filename) {
@@ -49,12 +50,18 @@ function _writeFile (filename, data, options, callback) {
   }
 
   function thenWriteFile () {
+    var removeOnExit = onExit(function () {
+      try {
+        fs.unlinkSync(tmpfile)
+      } catch (_) {}
+    })
     chain([
       [writeFileAsync, tmpfile, data, options.mode, options.encoding || 'utf8'],
       options.chown && [fs, fs.chown, tmpfile, options.chown.uid, options.chown.gid],
       options.mode && [fs, fs.chmod, tmpfile, options.mode],
       [fs, fs.rename, tmpfile, filename]
     ], function (err) {
+      removeOnExit()
       err ? fs.unlink(tmpfile, function () { callback(err) })
         : callback()
     })
@@ -114,6 +121,11 @@ function writeFileSync (filename, data, options) {
       }
     }
 
+    var removeOnExit = onExit(function () {
+      try {
+        fs.unlinkSync(tmpfile)
+      } catch (_) {}
+    })
     var fd = fs.openSync(tmpfile, 'w', options.mode)
     if (Buffer.isBuffer(data)) {
       fs.writeSync(fd, data, 0, data.length, 0)
@@ -127,7 +139,9 @@ function writeFileSync (filename, data, options) {
     if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
     if (options.mode) fs.chmodSync(tmpfile, options.mode)
     fs.renameSync(tmpfile, filename)
+    removeOnExit()
   } catch (err) {
+    removeOnExit()
     try { fs.unlinkSync(tmpfile) } catch (e) {}
     throw err
   }
