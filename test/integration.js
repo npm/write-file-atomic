@@ -93,6 +93,15 @@ test('writes buffers to simple file (async)', function (t) {
   })
 })
 
+test('writes undefined to simple file (async)', function (t) {
+  t.plan(3)
+  var file = tmpFile()
+  didWriteFileAtomic(t, {}, file, undefined, function (err) {
+    t.ifError(err, 'no error')
+    t.is(readFile(file), '', 'content ok')
+  })
+})
+
 test('writes to symlinks without clobbering (async)', function (t) {
   t.plan(5)
   var file = tmpFile()
@@ -117,12 +126,15 @@ test('runs chown on given file (async)', function (t) {
 })
 
 test('runs chmod on given file (async)', function (t) {
-  t.plan(3)
+  t.plan(5)
   var file = tmpFile()
   didWriteFileAtomic(t, {}, file, '42', { mode: parseInt('741', 8) }, function (err) {
     t.ifError(err, 'no error')
     var stat = fs.statSync(file)
     t.is(stat.mode, parseInt('100741', 8))
+    didWriteFileAtomic(t, {uid: 42, gid: 43}, file, '23', { chown: { uid: 42, gid: 43 } }, function (err) {
+      t.ifError(err, 'no error')
+    })
   })
 })
 
@@ -186,6 +198,13 @@ test('writes simple buffer file (sync)', function (t) {
   t.is(readFile(file), '42')
 })
 
+test('writes undefined file (sync)', function (t) {
+  t.plan(2)
+  var file = tmpFile()
+  didWriteFileAtomicSync(t, {}, file, undefined)
+  t.is(readFile(file), '')
+})
+
 test('writes to symlinks without clobbering (sync)', function (t) {
   t.plan(4)
   var file = tmpFile()
@@ -205,11 +224,12 @@ test('runs chown on given file (sync)', function (t) {
 })
 
 test('runs chmod on given file (sync)', function (t) {
-  t.plan(2)
+  t.plan(3)
   var file = tmpFile()
   didWriteFileAtomicSync(t, {}, file, '42', { mode: parseInt('741', 8) })
   var stat = fs.statSync(file)
   t.is(stat.mode, parseInt('100741', 8))
+  didWriteFileAtomicSync(t, {uid: 42, gid: 43}, file, '23', { chown: { uid: 42, gid: 43 } })
 })
 
 test('runs chown and chmod (sync)', function (t) {

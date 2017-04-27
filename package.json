@@ -4,7 +4,7 @@
   "description": "Write files in an atomic fashion w/configurable ownership",
   "main": "index.js",
   "scripts": {
-    "test": "standard && tap --coverage test/*.js"
+    "test": "standard && tap --100 test/*.js"
   },
   "repository": {
     "type": "git",
