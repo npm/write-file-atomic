@@ -41,7 +41,7 @@ function _writeFile (filename, data, options, callback) {
       if (!options.mode) {
         options.mode = stats.mode
       }
-      if (!options.chown && process.getuid) {
+      if (typeof options.chown === 'undefined' && process.getuid) {
         options.chown = { uid: stats.uid, gid: stats.gid }
       }
       return thenWriteFile()
