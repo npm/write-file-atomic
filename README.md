@@ -9,12 +9,12 @@ atomic and allows you set ownership (uid/gid of the file).
 * filename **String**
 * data **String** | **Buffer**
 * options **Object** | **String**
-  * chown **Object**
+  * chown **Object** default, uid & gid of existing file, if any
     * uid **Number**
     * gid **Number**
   * encoding **String** | **Null** default = 'utf8'
   * fsync **Boolean** default = true
-  * mode **Number** default = 438 (aka 0666 in Octal)
+  * mode **Number** default, from existing file, if any
   * Promise **Object** default = native Promise object
 * callback **Function**
 
@@ -30,7 +30,13 @@ pass the error back to the caller.
 If multiple writes are concurrently issued to the same file, the write operations are put into a queue and serialized in the order they were called, using Promises. Native promises are used by default, but you can inject your own promise-like object with the **Promise** option. Writes to different files are still executed in parallel.
 
 If provided, the **chown** option requires both **uid** and **gid** properties or else
-you'll get an error.
+you'll get an error.  If **chown** is not specified it will default to using
+the owner of the previous file.  To prevent chown from being ran you can
+also pass `false`, in which case the file will be created with the current user's credentials.
+
+If **mode** is not specified, it will default to using the permissions from
+an existing file, if any.  Expicitly setting this to `false` remove this default, resulting
+in a file created with the system default permissions.
 
 If options is a String, it's assumed to be the **encoding** option. The **encoding** option is ignored if **data** is a buffer. It defaults to 'utf8'.
 

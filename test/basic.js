@@ -140,7 +140,7 @@ test('async tests', function (t) {
 })
 
 test('sync tests', function (t) {
-  t.plan(11)
+  t.plan(12)
   var throws = function (shouldthrow, msg, todo) {
     var err
     try { todo() } catch (e) { err = e }
@@ -173,8 +173,11 @@ test('sync tests', function (t) {
   throws('ENOCHOWN', 'Chown failures propagate', function () {
     writeFileAtomicSync('nochown', 'test', { chown: { uid: 100, gid: 100 } })
   })
-  noexception('No attempt to chown when no uid/gid passed in', function () {
-    writeFileAtomicSync('nochown', 'test')
+  noexception('No attempt to chown when false passed in', function () {
+    writeFileAtomicSync('nochown', 'test', { chown: false })
+  })
+  noexception('No errors occured when chown is undefined and original file owner used', function () {
+    writeFileAtomicSync('chowncopy', 'test', { chown: undefined })
   })
   throws('ENORENAME', 'Rename errors propagate', function () {
     writeFileAtomicSync('norename', 'test')

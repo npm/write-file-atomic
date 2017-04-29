@@ -86,10 +86,10 @@ function writeFile (filename, data, options, callback) {
           else {
             options = Object.assign({}, options)
 
-            if (!options.mode) {
+            if (options.mode == null) {
               options.mode = stats.mode
             }
-            if (!options.chown && process.getuid) {
+            if (options.chown == null && process.getuid) {
               options.chown = { uid: stats.uid, gid: stats.gid }
             }
             resolve()
