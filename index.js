@@ -4,7 +4,7 @@ module.exports.sync = writeFileSync
 module.exports._getTmpname = getTmpname // for testing
 
 var fs = require('graceful-fs')
-var chain = require('slide').chain
+// var chain = require('slide').chain
 var MurmurHash3 = require('imurmurhash')
 
 var invocations = 0
@@ -49,14 +49,42 @@ function _writeFile (filename, data, options, callback) {
   }
 
   function thenWriteFile () {
-    chain([
-      [writeFileAsync, tmpfile, data, options.mode, options.encoding || 'utf8'],
-      options.chown && [fs, fs.chown, tmpfile, options.chown.uid, options.chown.gid],
-      options.mode && [fs, fs.chmod, tmpfile, options.mode],
-      [fs, fs.rename, tmpfile, filename]
-    ], function (err) {
-      err ? fs.unlink(tmpfile, function () { callback(err) })
-        : callback()
+    new Promise(function (resolve, reject) {
+      writeFileAsync(tmpfile, data, options.mode, options.encoding || 'utf8', function (err) {
+        if (err) reject(err)
+        else resolve()
+      })
+    }).then(function () {
+      if (options.chown) {
+        return new Promise(function (resolve, reject) {
+          fs.chown(tmpfile, options.chown.uid, options.chown.gid, function (err) {
+            if (err) reject(err)
+            else resolve()
+          })
+        })
+      }
+    }).then(function () {
+      if (options.mode) {
+        return new Promise(function (resolve, reject) {
+          fs.chmod(tmpfile, options.mode, function (err) {
+            if (err) reject(err)
+            else resolve()
+          })
+        })
+      }
+    }).then(function () {
+      return new Promise(function (resolve, reject) {
+        fs.rename(tmpfile, filename, function (err) {
+          if (err) reject(err)
+          resolve()
+        })
+      })
+    }).then(function () {
+      callback()
+    }).catch(function (err) {
+      fs.unlink(tmpfile, function () {
+        callback(err)
+      })
     })
   }
 
