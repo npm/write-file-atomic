@@ -90,23 +90,35 @@ function _writeFile (filename, data, options, callback) {
   // doing this instead of `fs.writeFile` in order to get the ability to
   // call `fsync`.
   function writeFileAsync (file, data, mode, encoding, cb) {
-    fs.open(file, 'w', options.mode, function (err, fd) {
-      if (err) return cb(err)
-      if (Buffer.isBuffer(data)) {
-        return fs.write(fd, data, 0, data.length, 0, syncAndClose)
-      } else if (data != null) {
-        return fs.write(fd, String(data), 0, String(encoding), syncAndClose)
-      } else {
-        return syncAndClose()
-      }
-      function syncAndClose (err) {
-        if (err) return cb(err)
+    var fd
+    new Promise(function (resolve, reject) {
+      fs.open(file, 'w', options.mode, function (err, _fd) {
+        fd = _fd
+        if (err) reject(err)
+        else resolve()
+      })
+    }).then(function () {
+      return new Promise(function (resolve, reject) {
+        if (Buffer.isBuffer(data)) {
+          fs.write(fd, data, 0, data.length, 0, function (err) {
+            if (err) reject(err)
+            else resolve()
+          })
+        } else if (data != null) {
+          fs.write(fd, String(data), 0, String(encoding), function (err) {
+            if (err) reject(err)
+            else resolve()
+          })
+        } else resolve()
+      })
+    }).then(function syncAndClose () {
+      return new Promise(function (resolve, reject) {
         fs.fsync(fd, function (err) {
-          if (err) return cb(err)
-          fs.close(fd, cb)
+          if (err) reject(err)
+          else fs.close(fd, resolve)
         })
-      }
-    })
+      })
+    }).then(cb, cb)
   }
 }
 
