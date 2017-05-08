@@ -28,33 +28,32 @@ function writeFile (filename, data, options, callback) {
 }
 function _writeFile (filename, data, options, callback) {
   var tmpfile = getTmpname(filename)
-
-  if (options.mode && options.chown) {
-    return thenWriteFile()
-  } else {
-    // Either mode or chown is not explicitly set
-    // Default behavior is to copy it from original file
-    return fs.stat(filename, function (err, stats) {
-      if (err || !stats) return thenWriteFile()
-
-      options = Object.assign({}, options)
-      if (!options.mode) {
-        options.mode = stats.mode
-      }
-      if (!options.chown && process.getuid) {
-        options.chown = { uid: stats.uid, gid: stats.gid }
-      }
-      return thenWriteFile()
-    })
-  }
-
-  function thenWriteFile () {
-    new Promise(function (resolve, reject) {
+  new Promise(function stat (resolve, reject) {
+    if (options.mode && options.chown) resolve()
+    else {
+      // Either mode or chown is not explicitly set
+      // Default behavior is to copy it from original file
+      fs.stat(filename, function (err, stats) {
+        if (err || !stats) resolve()
+        else {
+          options = Object.assign({}, options)
+          if (!options.mode) {
+            options.mode = stats.mode
+          }
+          if (!options.chown && process.getuid) {
+            options.chown = { uid: stats.uid, gid: stats.gid }
+          }
+          resolve()
+        }
+      })
+    }
+  }).then(function thenWriteFile () {
+    return new Promise(function (resolve, reject) {
       writeFileAsync(tmpfile, data, options.mode, options.encoding || 'utf8', function (err) {
         if (err) reject(err)
         else resolve()
       })
-    }).then(function () {
+    }).then(function chown () {
       if (options.chown) {
         return new Promise(function (resolve, reject) {
           fs.chown(tmpfile, options.chown.uid, options.chown.gid, function (err) {
@@ -63,7 +62,7 @@ function _writeFile (filename, data, options, callback) {
           })
         })
       }
-    }).then(function () {
+    }).then(function chmod () {
       if (options.mode) {
         return new Promise(function (resolve, reject) {
           fs.chmod(tmpfile, options.mode, function (err) {
@@ -72,21 +71,21 @@ function _writeFile (filename, data, options, callback) {
           })
         })
       }
-    }).then(function () {
+    }).then(function rename () {
       return new Promise(function (resolve, reject) {
         fs.rename(tmpfile, filename, function (err) {
           if (err) reject(err)
-          resolve()
+          else resolve()
         })
       })
-    }).then(function () {
+    }).then(function success () {
       callback()
-    }).catch(function (err) {
+    }).catch(function fail (err) {
       fs.unlink(tmpfile, function () {
         callback(err)
       })
     })
-  }
+  })
 
   // doing this instead of `fs.writeFile` in order to get the ability to
   // call `fsync`.
