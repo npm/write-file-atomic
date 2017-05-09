@@ -1,6 +1,6 @@
 {
   "name": "write-file-atomic",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Write files in an atomic fashion w/configurable ownership",
   "main": "index.js",
   "scripts": {
@@ -22,8 +22,7 @@
   "homepage": "https://github.com/iarna/write-file-atomic",
   "dependencies": {
     "graceful-fs": "^4.1.11",
-    "imurmurhash": "^0.1.4",
-    "slide": "^1.1.5"
+    "imurmurhash": "^0.1.4"
   },
   "devDependencies": {
     "mkdirp": "^0.5.1",
