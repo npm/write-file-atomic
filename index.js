@@ -48,10 +48,34 @@ function _writeFile (filename, data, options, callback) {
       })
     }
   }).then(function thenWriteFile () {
+    var fd
+    
     return new Promise(function (resolve, reject) {
-      writeFileAsync(tmpfile, data, options.mode, options.encoding || 'utf8', function (err) {
+      fs.open(tmpfile, 'w', options.mode, function (err, _fd) {
+        fd = _fd
         if (err) reject(err)
         else resolve()
+      })
+    }).then(function write () {
+      return new Promise(function (resolve, reject) {
+        if (Buffer.isBuffer(data)) {
+          fs.write(fd, data, 0, data.length, 0, function (err) {
+            if (err) reject(err)
+            else resolve()
+          })
+        } else if (data != null) {
+          fs.write(fd, String(data), 0, String(options.encoding || 'utf8'), function (err) {
+            if (err) reject(err)
+            else resolve()
+          })
+        } else resolve()
+      })
+    }).then(function syncAndClose () {
+      return new Promise(function (resolve, reject) {
+        fs.fsync(fd, function (err) {
+          if (err) reject(err)
+          else fs.close(fd, resolve)
+        })
       })
     }).then(function chown () {
       if (options.chown) {
@@ -86,40 +110,6 @@ function _writeFile (filename, data, options, callback) {
       })
     })
   })
-
-  // doing this instead of `fs.writeFile` in order to get the ability to
-  // call `fsync`.
-  function writeFileAsync (file, data, mode, encoding, cb) {
-    var fd
-    new Promise(function (resolve, reject) {
-      fs.open(file, 'w', options.mode, function (err, _fd) {
-        fd = _fd
-        if (err) reject(err)
-        else resolve()
-      })
-    }).then(function () {
-      return new Promise(function (resolve, reject) {
-        if (Buffer.isBuffer(data)) {
-          fs.write(fd, data, 0, data.length, 0, function (err) {
-            if (err) reject(err)
-            else resolve()
-          })
-        } else if (data != null) {
-          fs.write(fd, String(data), 0, String(encoding), function (err) {
-            if (err) reject(err)
-            else resolve()
-          })
-        } else resolve()
-      })
-    }).then(function syncAndClose () {
-      return new Promise(function (resolve, reject) {
-        fs.fsync(fd, function (err) {
-          if (err) reject(err)
-          else fs.close(fd, resolve)
-        })
-      })
-    }).then(cb, cb)
-  }
 }
 
 function writeFileSync (filename, data, options) {
