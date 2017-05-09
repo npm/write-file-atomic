@@ -21,11 +21,11 @@ function writeFile (filename, data, options, callback) {
     options = null
   }
   if (!options) options = {}
-  
+
   var truename
   var fd
   var tmpfile
-  
+
   new Promise(function (resolve) {
     fs.realpath(filename, function (_, realname) {
       truename = realname || filename
