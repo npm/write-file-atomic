@@ -42,6 +42,7 @@ function writeFile (filename, data, options, callback) {
           if (err || !stats) resolve()
           else {
             options = Object.assign({}, options)
+            
             if (!options.mode) {
               options.mode = stats.mode
             }
