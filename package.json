@@ -10,6 +10,9 @@
     "type": "git",
     "url": "git@github.com:iarna/write-file-atomic.git"
   },
+  "files": [
+    "index.js"
+  ],
   "keywords": [
     "writeFile",
     "atomic"
