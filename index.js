@@ -74,10 +74,14 @@ function _writeFile (filename, data, options, callback) {
       }
       function syncAndClose (err) {
         if (err) return cb(err)
-        fs.fsync(fd, function (err) {
-          if (err) return cb(err)
+        if (options.fsync !== false) {
+          fs.fsync(fd, function (err) {
+            if (err) return cb(err)
+            fs.close(fd, cb)
+          })
+        } else {
           fs.close(fd, cb)
-        })
+        }
       }
     })
   }
@@ -116,7 +120,9 @@ function writeFileSync (filename, data, options) {
     } else if (data != null) {
       fs.writeSync(fd, String(data), 0, String(options.encoding || 'utf8'))
     }
-    fs.fsyncSync(fd)
+    if (options.fsync !== false) {
+      fs.fsyncSync(fd)
+    }
     fs.closeSync(fd)
     if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
     if (options.mode) fs.chmodSync(tmpfile, options.mode)

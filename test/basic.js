@@ -82,7 +82,7 @@ test('getTmpname', function (t) {
 })
 
 test('async tests', function (t) {
-  t.plan(9)
+  t.plan(10)
   writeFileAtomic('good', 'test', {mode: '0777'}, function (err) {
     t.notOk(err, 'No errors occur when passing in options')
   })
@@ -101,6 +101,9 @@ test('async tests', function (t) {
   writeFileAtomic('nochown', 'test', function (err) {
     t.notOk(err, 'No attempt to chown when no uid/gid passed in')
   })
+  writeFileAtomic('nofsyncopt', 'test', {fsync: false}, function (err) {
+    t.notOk(err, 'fsync skipped if options.fsync is false')
+  })
   writeFileAtomic('norename', 'test', function (err) {
     t.is(err && err.message, 'ENORENAME', 'Rename errors propagate')
   })
@@ -108,12 +111,12 @@ test('async tests', function (t) {
     t.is(err && err.message, 'ENORENAME', 'Failure to unlink the temp file does not clobber the original error')
   })
   writeFileAtomic('nofsync', 'test', function (err) {
-    t.is(err && err.message, 'ENOFSYNC', 'Fxync failures propagate')
+    t.is(err && err.message, 'ENOFSYNC', 'Fsync failures propagate')
   })
 })
 
 test('sync tests', function (t) {
-  t.plan(9)
+  t.plan(10)
   var throws = function (shouldthrow, msg, todo) {
     var err
     try { todo() } catch (e) { err = e }
@@ -130,6 +133,9 @@ test('sync tests', function (t) {
   })
   noexception('No errors occur when NOT passing in options', function () {
     writeFileAtomicSync('good', 'test')
+  })
+  noexception('fsync never called if options.fsync is falsy', function () {
+    writeFileAtomicSync('good', 'test', {fsync: false})
   })
   throws('ENOWRITE', 'fs.writeSync failures propagate', function () {
     writeFileAtomicSync('nowrite', 'test')
