@@ -82,12 +82,16 @@ test('getTmpname', function (t) {
 })
 
 test('async tests', function (t) {
-  t.plan(10)
+  t.plan(14)
   writeFileAtomic('good', 'test', {mode: '0777'}, function (err) {
     t.notOk(err, 'No errors occur when passing in options')
   })
   writeFileAtomic('good', 'test', function (err) {
     t.notOk(err, 'No errors occur when NOT passing in options')
+  })
+  writeFileAtomic('good', 'test', function (err, tmpfile) {
+    t.notOk(err)
+    t.match(tmpfile, /^good\.\d+$/, 'Provides tmpfile in callback upon success')
   })
   writeFileAtomic('noopen', 'test', function (err) {
     t.is(err && err.message, 'ENOOPEN', 'fs.open failures propagate')
@@ -113,10 +117,14 @@ test('async tests', function (t) {
   writeFileAtomic('nofsync', 'test', function (err) {
     t.is(err && err.message, 'ENOFSYNC', 'Fsync failures propagate')
   })
+  writeFileAtomic('noopen', 'test', function (err, tmpfile) {
+    t.ok(err)
+    t.match(tmpfile, /^noopen\.\d+$/, 'Provides tmpfile in callback upon failure')
+  })
 })
 
 test('sync tests', function (t) {
-  t.plan(10)
+  t.plan(12)
   var throws = function (shouldthrow, msg, todo) {
     var err
     try { todo() } catch (e) { err = e }
@@ -133,6 +141,9 @@ test('sync tests', function (t) {
   })
   noexception('No errors occur when NOT passing in options', function () {
     writeFileAtomicSync('good', 'test')
+  })
+  noexception('Returns tmpfile upon success', function () {
+    t.match(writeFileAtomicSync('good', 'test'), /^good\.\d+$/)
   })
   noexception('fsync never called if options.fsync is falsy', function () {
     writeFileAtomicSync('good', 'test', {fsync: false})

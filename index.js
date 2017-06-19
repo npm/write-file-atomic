@@ -55,8 +55,8 @@ function _writeFile (filename, data, options, callback) {
       options.mode && [fs, fs.chmod, tmpfile, options.mode],
       [fs, fs.rename, tmpfile, filename]
     ], function (err) {
-      err ? fs.unlink(tmpfile, function () { callback(err) })
-        : callback()
+      err ? fs.unlink(tmpfile, function () { callback(err, tmpfile) })
+        : callback(null, tmpfile)
     })
   }
 
@@ -127,6 +127,7 @@ function writeFileSync (filename, data, options) {
     if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
     if (options.mode) fs.chmodSync(tmpfile, options.mode)
     fs.renameSync(tmpfile, filename)
+    return tmpfile
   } catch (err) {
     try { fs.unlinkSync(tmpfile) } catch (e) {}
     throw err
