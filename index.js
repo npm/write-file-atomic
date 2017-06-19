@@ -159,14 +159,14 @@ function writeFile (filename, data, options, callback) {
     })
   }).then(function success () {
     removeOnExitHandler()
-    callback()
+    callback(null, tmpfile)
   }, function fail (err) {
     return new Promise(resolve => {
       return fd ? fs.close(fd, resolve) : resolve()
     }).then(() => {
       removeOnExitHandler()
       fs.unlink(tmpfile, function () {
-        callback(err)
+        callback(err, tmpfile)
       })
     })
   }).then(function checkQueue () {
@@ -223,6 +223,7 @@ function writeFileSync (filename, data, options) {
     if (options.mode) fs.chmodSync(tmpfile, options.mode)
     fs.renameSync(tmpfile, filename)
     removeOnExitHandler()
+    return tmpfile
   } catch (err) {
     if (fd) {
       try {

@@ -42,6 +42,10 @@ If options is a String, it's assumed to be the **encoding** option. The **encodi
 
 If the **fsync** option is **false**, writeFile will skip the final fsync call.
 
+The callback is always invoked with the initial (temporary) filename.  Note
+that by the time the callback is executed, the temporary file has already
+been deleted.
+
 Example:
 
 ```javascript
@@ -53,4 +57,6 @@ writeFileAtomic('message.txt', 'Hello Node', {chown:{uid:100,gid:50}}, function 
 
 ### var writeFileAtomicSync = require('write-file-atomic').sync<br>writeFileAtomicSync(filename, data, [options])
 
-The synchronous version of **writeFileAtomic**.
+The synchronous version of **writeFileAtomic**. Returns the initial
+(temporary) filename.  Note that by the time the function returns, the
+temporary file has already been deleted.
