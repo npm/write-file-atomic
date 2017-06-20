@@ -16,7 +16,7 @@ atomic and allows you set ownership (uid/gid of the file).
   * fsync **Boolean** default = true
   * mode **Number** default = 438 (aka 0666 in Octal)
   * Promise **Object** default = native Promise object
-callback **Function**
+* callback **Function**
 
 Atomically and asynchronously writes data to a file, replacing the file if it already
 exists.  data can be a string or a buffer.
