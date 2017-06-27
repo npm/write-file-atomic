@@ -125,6 +125,16 @@ test('runs chown on given file (async)', function (t) {
   })
 })
 
+test('writes simple file with no chown (async)', function (t) {
+  t.plan(3)
+  var file = tmpFile()
+  didWriteFileAtomic(t, {}, file, '42', { chown: false }, function (err) {
+    t.ifError(err, 'no error')
+    t.is(readFile(file), '42', 'content ok')
+    t.done()
+  })
+})
+
 test('runs chmod on given file (async)', function (t) {
   t.plan(5)
   var file = tmpFile()

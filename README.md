@@ -26,7 +26,7 @@ it encounters errors at any of these steps it will attempt to unlink the tempora
 pass the error back to the caller.
 
 If provided, the **chown** option requires both **uid** and **gid** properties or else
-you'll get an error. If **chown** is not specified it will default to using the owner of the previous file.  To prevent chown from being used you can also pass `false`
+you'll get an error. If **chown** is not specified it will default to using the owner of the previous file.  To prevent chown from being ran you can also pass `false`
 
 The **encoding** option is ignored if **data** is a buffer. It defaults to 'utf8'.
 
