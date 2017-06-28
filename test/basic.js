@@ -82,7 +82,7 @@ test('getTmpname', function (t) {
 })
 
 test('async tests', function (t) {
-  t.plan(10)
+  t.plan(12)
   writeFileAtomic('good', 'test', {mode: '0777'}, function (err) {
     t.notOk(err, 'No errors occur when passing in options')
   })
@@ -95,11 +95,17 @@ test('async tests', function (t) {
   writeFileAtomic('nowrite', 'test', function (err) {
     t.is(err && err.message, 'ENOWRITE', 'fs.writewrite failures propagate')
   })
+  writeFileAtomic('nowrite', Buffer.from('test', 'utf8'), function (err) {
+    t.is(err && err.message, 'ENOWRITE', 'fs.writewrite failures propagate for buffers')
+  })
   writeFileAtomic('nochown', 'test', {chown: {uid: 100, gid: 100}}, function (err) {
     t.is(err && err.message, 'ENOCHOWN', 'Chown failures propagate')
   })
   writeFileAtomic('nochown', 'test', function (err) {
     t.notOk(err, 'No attempt to chown when no uid/gid passed in')
+  })
+  writeFileAtomic('nochmod', 'test', { mode: parseInt('741', 8) }, function (err) {
+    t.is(err && err.message, 'ENOCHMOD', 'Chmod failures propagate')
   })
   writeFileAtomic('nofsyncopt', 'test', {fsync: false}, function (err) {
     t.notOk(err, 'fsync skipped if options.fsync is false')
