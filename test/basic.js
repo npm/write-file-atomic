@@ -165,3 +165,18 @@ test('sync tests', function (t) {
     writeFileAtomicSync('nofsync', 'test')
   })
 })
+
+test('promise injection', function (t) {
+  t.plan(2)
+  var usedCustomPromise = false
+  class customPromise extends Promise {
+    then () {
+      usedCustomPromise = true
+      return super.then.apply(this, arguments)
+    }
+  }
+  writeFileAtomic('good', 'test', {Promise: customPromise}, function (err) {
+    t.notOk(err, 'no errors occur when providing customPromise')
+    t.true(usedCustomPromise, 'the custom promise was injected and used')
+  })
+})

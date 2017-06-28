@@ -25,6 +25,7 @@ function writeFile (filename, data, options, callback) {
   }
   if (!options) options = {}
 
+  var Promise = options.Promise || global.Promise
   var truename
   var fd
   var tmpfile
