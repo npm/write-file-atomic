@@ -4,7 +4,6 @@ module.exports.sync = writeFileSync
 module.exports._getTmpname = getTmpname // for testing
 
 var fs = require('graceful-fs')
-var chain = require('slide').chain
 var MurmurHash3 = require('imurmurhash')
 var onExit = require('signal-exit')
 
@@ -23,75 +22,112 @@ function writeFile (filename, data, options, callback) {
     options = null
   }
   if (!options) options = {}
-  fs.realpath(filename, function (_, realname) {
-    _writeFile(realname || filename, data, options, callback)
+
+  var truename
+  var fd
+  var tmpfile
+
+  var removeOnExit = onExit(function () {
+    try {
+      if (tmpfile) fs.unlinkSync(tmpfile)
+    } catch (_) {}
   })
-}
-function _writeFile (filename, data, options, callback) {
-  var tmpfile = getTmpname(filename)
 
-  if (options.mode && options.chown) {
-    return thenWriteFile()
-  } else {
-    // Either mode or chown is not explicitly set
-    // Default behavior is to copy it from original file
-    return fs.stat(filename, function (err, stats) {
-      if (err || !stats) return thenWriteFile()
+  new Promise(function (resolve) {
+    fs.realpath(filename, function (_, realname) {
+      truename = realname || filename
+      tmpfile = getTmpname(truename)
+      resolve()
+    })
+  }).then(function () {
+    return new Promise(function stat (resolve) {
+      if (options.mode && options.chown) resolve()
+      else {
+        // Either mode or chown is not explicitly set
+        // Default behavior is to copy it from original file
+        fs.stat(truename, function (err, stats) {
+          if (err || !stats) resolve()
+          else {
+            options = Object.assign({}, options)
 
-      options = Object.assign({}, options)
-      if (!options.mode) {
-        options.mode = stats.mode
+            if (!options.mode) {
+              options.mode = stats.mode
+            }
+            if (!options.chown && process.getuid) {
+              options.chown = { uid: stats.uid, gid: stats.gid }
+            }
+            resolve()
+          }
+        })
       }
-      if (!options.chown && process.getuid) {
-        options.chown = { uid: stats.uid, gid: stats.gid }
-      }
-      return thenWriteFile()
     })
-  }
-
-  function thenWriteFile () {
-    var removeOnExit = onExit(function () {
-      try {
-        fs.unlinkSync(tmpfile)
-      } catch (_) {}
+  }).then(function thenWriteFile () {
+    return new Promise(function (resolve, reject) {
+      fs.open(tmpfile, 'w', options.mode, function (err, _fd) {
+        fd = _fd
+        if (err) reject(err)
+        else resolve()
+      })
     })
-    chain([
-      [writeFileAsync, tmpfile, data, options.mode, options.encoding || 'utf8'],
-      options.chown && [fs, fs.chown, tmpfile, options.chown.uid, options.chown.gid],
-      options.mode && [fs, fs.chmod, tmpfile, options.mode],
-      [fs, fs.rename, tmpfile, filename]
-    ], function (err) {
-      removeOnExit()
-      err ? fs.unlink(tmpfile, function () { callback(err) })
-        : callback()
-    })
-  }
-
-  // doing this instead of `fs.writeFile` in order to get the ability to
-  // call `fsync`.
-  function writeFileAsync (file, data, mode, encoding, cb) {
-    fs.open(file, 'w', options.mode, function (err, fd) {
-      if (err) return cb(err)
+  }).then(function write () {
+    return new Promise(function (resolve, reject) {
       if (Buffer.isBuffer(data)) {
-        return fs.write(fd, data, 0, data.length, 0, syncAndClose)
+        fs.write(fd, data, 0, data.length, 0, function (err) {
+          if (err) reject(err)
+          else resolve()
+        })
       } else if (data != null) {
-        return fs.write(fd, String(data), 0, String(encoding), syncAndClose)
+        fs.write(fd, String(data), 0, String(options.encoding || 'utf8'), function (err) {
+          if (err) reject(err)
+          else resolve()
+        })
+      } else resolve()
+    })
+  }).then(function syncAndClose () {
+    return new Promise(function (resolve, reject) {
+      if (options.fsync !== false) {
+        fs.fsync(fd, function (err) {
+          if (err) reject(err)
+          else fs.close(fd, resolve)
+        })
       } else {
-        return syncAndClose()
-      }
-      function syncAndClose (err) {
-        if (err) return cb(err)
-        if (options.fsync !== false) {
-          fs.fsync(fd, function (err) {
-            if (err) return cb(err)
-            fs.close(fd, cb)
-          })
-        } else {
-          fs.close(fd, cb)
-        }
+        fs.close(fd, resolve)
       }
     })
-  }
+  }).then(function chown () {
+    if (options.chown) {
+      return new Promise(function (resolve, reject) {
+        fs.chown(tmpfile, options.chown.uid, options.chown.gid, function (err) {
+          if (err) reject(err)
+          else resolve()
+        })
+      })
+    }
+  }).then(function chmod () {
+    if (options.mode) {
+      return new Promise(function (resolve, reject) {
+        fs.chmod(tmpfile, options.mode, function (err) {
+          if (err) reject(err)
+          else resolve()
+        })
+      })
+    }
+  }).then(function rename () {
+    return new Promise(function (resolve, reject) {
+      fs.rename(tmpfile, truename, function (err) {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  }).then(function success () {
+    removeOnExit()
+    callback()
+  }).catch(function fail (err) {
+    removeOnExit()
+    fs.unlink(tmpfile, function () {
+      callback(err)
+    })
+  })
 }
 
 function writeFileSync (filename, data, options) {
@@ -132,9 +168,7 @@ function writeFileSync (filename, data, options) {
     } else if (data != null) {
       fs.writeSync(fd, String(data), 0, String(options.encoding || 'utf8'))
     }
-    if (options.fsync !== false) {
-      fs.fsyncSync(fd)
-    }
+    fs.fsyncSync(fd)
     fs.closeSync(fd)
     if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
     if (options.mode) fs.chmodSync(tmpfile, options.mode)
