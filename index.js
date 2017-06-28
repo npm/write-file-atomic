@@ -4,8 +4,9 @@ module.exports.sync = writeFileSync
 module.exports._getTmpname = getTmpname // for testing
 
 var fs = require('graceful-fs')
-var chain = require('slide').chain
 var MurmurHash3 = require('imurmurhash')
+var path = require('path')
+var activeFiles = {}
 
 var invocations = 0
 function getTmpname (filename) {
@@ -22,69 +23,110 @@ function writeFile (filename, data, options, callback) {
     options = null
   }
   if (!options) options = {}
-  fs.realpath(filename, function (_, realname) {
-    _writeFile(realname || filename, data, options, callback)
-  })
-}
-function _writeFile (filename, data, options, callback) {
-  var tmpfile = getTmpname(filename)
 
-  if (options.mode && options.chown) {
-    return thenWriteFile()
-  } else {
-    // Either mode or chown is not explicitly set
-    // Default behavior is to copy it from original file
-    return fs.stat(filename, function (err, stats) {
-      if (err || !stats) return thenWriteFile()
-
-      options = Object.assign({}, options)
-      if (!options.mode) {
-        options.mode = stats.mode
-      }
-      if (!options.chown && process.getuid) {
-        options.chown = { uid: stats.uid, gid: stats.gid }
-      }
-      return thenWriteFile()
-    })
+  var CustomPromise = options.Promise || Promise
+  function promisify (action) {
+    function thenable () {
+      return new CustomPromise(action)
+    }
+    thenable.then = function (next) { // lets promisify be the start of a promise chain
+      return thenable().then(next)
+    }
+    return thenable
   }
 
-  function thenWriteFile () {
-    chain([
-      [writeFileAsync, tmpfile, data, options.mode, options.encoding || 'utf8'],
-      options.chown && [fs, fs.chown, tmpfile, options.chown.uid, options.chown.gid],
-      options.mode && [fs, fs.chmod, tmpfile, options.mode],
-      [fs, fs.rename, tmpfile, filename]
-    ], function (err) {
-      err ? fs.unlink(tmpfile, function () { callback(err) })
-        : callback()
-    })
-  }
+  var truename
+  var fd
+  var tmpfile
+  var absoluteName = path.resolve(filename)
+  promisify(function serializeSameFile (resolve) {
+    // make a queue if it doesn't already exist
+    if (!activeFiles[absoluteName]) activeFiles[absoluteName] = []
 
-  // doing this instead of `fs.writeFile` in order to get the ability to
-  // call `fsync`.
-  function writeFileAsync (file, data, mode, encoding, cb) {
-    fs.open(file, 'w', options.mode, function (err, fd) {
-      if (err) return cb(err)
-      if (Buffer.isBuffer(data)) {
-        return fs.write(fd, data, 0, data.length, 0, syncAndClose)
-      } else if (data != null) {
-        return fs.write(fd, String(data), 0, String(encoding), syncAndClose)
-      } else {
-        return syncAndClose()
-      }
-      function syncAndClose (err) {
-        if (err) return cb(err)
-        if (options.fsync !== false) {
-          fs.fsync(fd, function (err) {
-            if (err) return cb(err)
-            fs.close(fd, cb)
-          })
-        } else {
-          fs.close(fd, cb)
+    activeFiles[absoluteName].push(resolve) // add this job to the queue
+    if (activeFiles[absoluteName].length === 1) resolve() // kick off the first one
+  }).then(promisify(function getRealPath (resolve) {
+    fs.realpath(filename, function (_, realname) {
+      truename = realname || filename
+      tmpfile = getTmpname(truename)
+      resolve()
+    })
+  })).then(promisify(function stat (resolve) {
+    if (options.mode && options.chown) resolve()
+    else {
+      // Either mode or chown is not explicitly set
+      // Default behavior is to copy it from original file
+      fs.stat(truename, function (err, stats) {
+        if (err || !stats) resolve()
+        else {
+          options = Object.assign({}, options)
+
+          if (!options.mode) {
+            options.mode = stats.mode
+          }
+          if (!options.chown && process.getuid) {
+            options.chown = { uid: stats.uid, gid: stats.gid }
+          }
+          resolve()
         }
-      }
+      })
+    }
+  })).then(promisify(function thenWriteFile (resolve, reject) {
+    fs.open(tmpfile, 'w', options.mode, function (err, _fd) {
+      fd = _fd
+      if (err) reject(err)
+      else resolve()
     })
-  }
+  })).then(promisify(function write (resolve, reject) {
+    if (Buffer.isBuffer(data)) {
+      fs.write(fd, data, 0, data.length, 0, function (err) {
+        if (err) reject(err)
+        else resolve()
+      })
+    } else if (data != null) {
+      fs.write(fd, String(data), 0, String(options.encoding || 'utf8'), function (err) {
+        if (err) reject(err)
+        else resolve()
+      })
+    } else resolve()
+  })).then(promisify(function syncAndClose (resolve, reject) {
+    if (options.fsync !== false) {
+      fs.fsync(fd, function (err) {
+        if (err) reject(err)
+        else fs.close(fd, resolve)
+      })
+    } else resolve()
+  })).then(promisify(function chown (resolve, reject) {
+    if (options.chown) {
+      fs.chown(tmpfile, options.chown.uid, options.chown.gid, function (err) {
+        if (err) reject(err)
+        else resolve()
+      })
+    } else resolve()
+  })).then(promisify(function chmod (resolve, reject) {
+    if (options.mode) {
+      fs.chmod(tmpfile, options.mode, function (err) {
+        if (err) reject(err)
+        else resolve()
+      })
+    } else resolve()
+  })).then(promisify(function rename (resolve, reject) {
+    fs.rename(tmpfile, truename, function (err) {
+      if (err) reject(err)
+      else resolve()
+    })
+  })).then(function success () {
+    callback()
+  }).catch(function fail (err) {
+    fs.unlink(tmpfile, function () {
+      callback(err)
+    })
+  }).then(function checkQueue () {
+    activeFiles[absoluteName].shift() // remove the element added by serializeSameFile
+    if (activeFiles[absoluteName].length > 0) {
+      activeFiles[absoluteName][0]() // start next job if one is pending
+    } else delete activeFiles[absoluteName]
+  })
 }
 
 function writeFileSync (filename, data, options) {
