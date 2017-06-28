@@ -6,6 +6,8 @@ module.exports._getTmpname = getTmpname // for testing
 var fs = require('graceful-fs')
 var MurmurHash3 = require('imurmurhash')
 var onExit = require('signal-exit')
+var path = require('path')
+var activeFiles = {}
 
 var invocations = 0
 function getTmpname (filename) {
@@ -26,6 +28,7 @@ function writeFile (filename, data, options, callback) {
   var truename
   var fd
   var tmpfile
+  var absoluteName = path.resolve(filename)
 
   var removeOnExit = onExit(function () {
     try {
@@ -33,13 +36,21 @@ function writeFile (filename, data, options, callback) {
     } catch (_) {}
   })
 
-  new Promise(function (resolve) {
-    fs.realpath(filename, function (_, realname) {
-      truename = realname || filename
-      tmpfile = getTmpname(truename)
-      resolve()
+  new Promise(function serializeSameFile (resolve) {
+    // make a queue if it doesn't already exist
+    if (!activeFiles[absoluteName]) activeFiles[absoluteName] = []
+
+    activeFiles[absoluteName].push(resolve) // add this job to the queue
+    if (activeFiles[absoluteName].length === 1) resolve() // kick off the first one
+  }).then(function getRealPath () {
+    return new Promise(function (resolve) {
+      fs.realpath(filename, function (_, realname) {
+        truename = realname || filename
+        tmpfile = getTmpname(truename)
+        resolve()
+      })
     })
-  }).then(function () {
+  }).then(function stat () {
     return new Promise(function stat (resolve) {
       if (options.mode && options.chown) resolve()
       else {
@@ -84,16 +95,14 @@ function writeFile (filename, data, options, callback) {
       } else resolve()
     })
   }).then(function syncAndClose () {
-    return new Promise(function (resolve, reject) {
-      if (options.fsync !== false) {
+    if (options.fsync !== false) {
+      return new Promise(function (resolve, reject) {
         fs.fsync(fd, function (err) {
           if (err) reject(err)
           else fs.close(fd, resolve)
         })
-      } else {
-        fs.close(fd, resolve)
-      }
-    })
+      })
+    }
   }).then(function chown () {
     if (options.chown) {
       return new Promise(function (resolve, reject) {
@@ -127,6 +136,11 @@ function writeFile (filename, data, options, callback) {
     fs.unlink(tmpfile, function () {
       callback(err)
     })
+  }).then(function checkQueue () {
+    activeFiles[absoluteName].shift() // remove the element added by serializeSameFile
+    if (activeFiles[absoluteName].length > 0) {
+      activeFiles[absoluteName][0]() // start next job if one is pending
+    } else delete activeFiles[absoluteName]
   })
 }
 
@@ -168,7 +182,9 @@ function writeFileSync (filename, data, options) {
     } else if (data != null) {
       fs.writeSync(fd, String(data), 0, String(options.encoding || 'utf8'))
     }
-    fs.fsyncSync(fd)
+    if (options.fsync !== false) {
+      fs.fsyncSync(fd)
+    }
     fs.closeSync(fd)
     if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
     if (options.mode) fs.chmodSync(tmpfile, options.mode)
