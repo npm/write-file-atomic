@@ -2,6 +2,7 @@
 module.exports = writeFile
 module.exports.sync = writeFileSync
 module.exports._getTmpname = getTmpname // for testing
+module.exports._cleanupOnExit = cleanupOnExit
 
 var fs = require('graceful-fs')
 var MurmurHash3 = require('imurmurhash')
@@ -18,6 +19,14 @@ function getTmpname (filename) {
       .result()
 }
 
+function cleanupOnExit (tmpfile) {
+  return function () {
+    try {
+      fs.unlinkSync(typeof tmpfile === 'function' ? tmpfile() : tmpfile)
+    } catch (_) {}
+  }
+}
+
 function writeFile (filename, data, options, callback) {
   if (options instanceof Function) {
     callback = options
@@ -29,13 +38,8 @@ function writeFile (filename, data, options, callback) {
   var truename
   var fd
   var tmpfile
+  var removeOnExit = cleanupOnExit(() => tmpfile)
   var absoluteName = path.resolve(filename)
-
-  var removeOnExit = onExit(function () {
-    try {
-      if (tmpfile) fs.unlinkSync(tmpfile)
-    } catch (_) {}
-  })
 
   new Promise(function serializeSameFile (resolve) {
     // make a queue if it doesn't already exist
@@ -172,11 +176,7 @@ function writeFileSync (filename, data, options) {
       }
     }
 
-    var removeOnExit = onExit(function () {
-      try {
-        fs.unlinkSync(tmpfile)
-      } catch (_) {}
-    })
+    var removeOnExit = onExit(cleanupOnExit(tmpfile))
     var fd = fs.openSync(tmpfile, 'w', options.mode)
     if (Buffer.isBuffer(data)) {
       fs.writeSync(fd, data, 0, data.length, 0)

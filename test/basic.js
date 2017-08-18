@@ -1,6 +1,8 @@
 'use strict'
 var test = require('tap').test
 var requireInject = require('require-inject')
+
+var unlinked = []
 var writeFileAtomic = requireInject('../index', {
   'graceful-fs': {
     realpath: function (filename, cb) {
@@ -65,6 +67,7 @@ var writeFileAtomic = requireInject('../index', {
     },
     unlinkSync: function (tmpfile) {
       if (/nounlink/.test(tmpfile)) throw new Error('ENOUNLINK')
+      unlinked.push(tmpfile)
     },
     statSync: function (tmpfile) {
       if (/nostat/.test(tmpfile)) throw new Error('ENOSTAT')
@@ -78,6 +81,18 @@ test('getTmpname', function (t) {
   var a = getTmpname('abc.def')
   var b = getTmpname('abc.def')
   t.notEqual(a, b, 'different invocations of getTmpname get different results')
+  t.done()
+})
+
+test('cleanupOnExit', function (t) {
+  var file = 'tmpname'
+  unlinked = []
+  var cleanup = writeFileAtomic._cleanupOnExit(() => file)
+  cleanup()
+  t.isDeeply(unlinked, [file], 'cleanup code unlinks')
+  var cleanup2 = writeFileAtomic._cleanupOnExit('nounlink')
+  t.doesNotThrow(cleanup2, 'exceptions are caught')
+  unlinked = []
   t.done()
 })
 
