@@ -23,8 +23,7 @@
   "dependencies": {
     "graceful-fs": "^4.1.11",
     "imurmurhash": "^0.1.4",
-    "signal-exit": "^3.0.2",
-    "slide": "^1.1.5"
+    "signal-exit": "^3.0.2"
   },
   "devDependencies": {
     "mkdirp": "^0.5.1",
