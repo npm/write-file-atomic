@@ -189,8 +189,9 @@ function writeFileSync (filename, data, options) {
     fs.closeSync(fd)
     if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
     if (options.mode) fs.chmodSync(tmpfile, options.mode)
-    fs.renameSync(tmpfile, filename)
-    removeOnExit()
+    fs.rename(tmpfile, filename, function () {
+      removeOnExit()
+    })
   } catch (err) {
     removeOnExit()
     try { fs.unlinkSync(tmpfile) } catch (e) {}
