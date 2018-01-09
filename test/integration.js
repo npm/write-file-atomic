@@ -84,6 +84,15 @@ test('writes simple file (async)', function (t) {
   })
 })
 
+test('writes simple file with encoding (async)', function (t) {
+  t.plan(3)
+  var file = tmpFile()
+  didWriteFileAtomic(t, {}, file, 'foo', 'utf16le', function (err) {
+    t.ifError(err, 'no error')
+    t.is(readFile(file), 'f\u0000o\u0000o\u0000', 'content ok')
+  })
+})
+
 test('writes buffers to simple file (async)', function (t) {
   t.plan(3)
   var file = tmpFile()
@@ -189,6 +198,13 @@ test('writes simple file (sync)', function (t) {
   var file = tmpFile()
   didWriteFileAtomicSync(t, {}, file, '42')
   t.is(readFile(file), '42')
+})
+
+test('writes simple file with encoding (sync)', function (t) {
+  t.plan(2)
+  var file = tmpFile()
+  didWriteFileAtomicSync(t, {}, file, 'foo', 'utf16le')
+  t.is(readFile(file), 'f\u0000o\u0000o\u0000')
 })
 
 test('writes simple buffer file (sync)', function (t) {

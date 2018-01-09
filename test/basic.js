@@ -97,11 +97,14 @@ test('cleanupOnExit', function (t) {
 })
 
 test('async tests', function (t) {
-  t.plan(12)
+  t.plan(13)
   writeFileAtomic('good', 'test', {mode: '0777'}, function (err) {
     t.notOk(err, 'No errors occur when passing in options')
   })
-  writeFileAtomic('good', 'test', function (err) {
+  writeFileAtomic('good', 'test', 'utf8', function (err) {
+    t.notOk(err, 'No errors occur when passing in options as string')
+  })
+  writeFileAtomic('good', 'test', undefined, function (err) {
     t.notOk(err, 'No errors occur when NOT passing in options')
   })
   writeFileAtomic('noopen', 'test', function (err) {
@@ -137,7 +140,7 @@ test('async tests', function (t) {
 })
 
 test('sync tests', function (t) {
-  t.plan(10)
+  t.plan(11)
   var throws = function (shouldthrow, msg, todo) {
     var err
     try { todo() } catch (e) { err = e }
@@ -151,6 +154,9 @@ test('sync tests', function (t) {
 
   noexception('No errors occur when passing in options', function () {
     writeFileAtomicSync('good', 'test', {mode: '0777'})
+  })
+  noexception('No errors occur when passing in options as string', function () {
+    writeFileAtomicSync('good', 'test', 'utf8')
   })
   noexception('No errors occur when NOT passing in options', function () {
     writeFileAtomicSync('good', 'test')

@@ -8,7 +8,7 @@ atomic and allows you set ownership (uid/gid of the file).
 
 * filename **String**
 * data **String** | **Buffer**
-* options **Object**
+* options **Object** | **String**
   * chown **Object**
     * uid **Number**
     * gid **Number**
@@ -31,7 +31,7 @@ If multiple writes are concurrently issued to the same file, the write operation
 If provided, the **chown** option requires both **uid** and **gid** properties or else
 you'll get an error.
 
-The **encoding** option is ignored if **data** is a buffer. It defaults to 'utf8'.
+If options is a String, it's assumed to be the **encoding** option. The **encoding** option is ignored if **data** is a buffer. It defaults to 'utf8'.
 
 If the **fsync** option is **false**, writeFile will skip the final fsync call.
 
