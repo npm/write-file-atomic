@@ -43,11 +43,16 @@ function cleanupOnExit (tmpfile) {
 }
 
 function writeFile (filename, data, options, callback) {
-  if (options instanceof Function) {
-    callback = options
-    options = null
+  if (options) {
+    if (options instanceof Function) {
+      callback = options
+      options = {}
+    } else if (typeof options === 'string') {
+      options = { encoding: options }
+    }
+  } else {
+    options = {}
   }
-  if (!options) options = {}
 
   var Promise = options.Promise || global.Promise
   var truename
@@ -164,7 +169,8 @@ function writeFile (filename, data, options, callback) {
 }
 
 function writeFileSync (filename, data, options) {
-  if (!options) options = {}
+  if (typeof options === 'string') options = { encoding: options }
+  else if (!options) options = {}
   try {
     filename = fs.realpathSync(filename)
   } catch (ex) {
