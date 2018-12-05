@@ -149,7 +149,6 @@ function writeFile (filename, data, options, callback) {
       })
     })
   }).then(function success () {
-    removeOnExit()
     callback()
   }).catch(function fail (err) {
     removeOnExit()
