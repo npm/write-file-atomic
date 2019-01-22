@@ -11,17 +11,18 @@ var path = require('path')
 var activeFiles = {}
 
 // if we run inside of a worker_thread, `process.pid` is not unique
-var id = (function getId () {
+/* istanbul ignore next */
+var threadId = (function getId () {
   try {
     var workerThreads = require('worker_threads')
 
     if (workerThreads.isMainThread) {
-      return process.pid
+      return 0
     }
 
-    return workerThreads.threadId || process.pid
+    return workerThreads.threadId || 0
   } catch (e) {
-    return process.pid
+    return 0
   }
 })()
 
@@ -29,7 +30,8 @@ var invocations = 0
 function getTmpname (filename) {
   return filename + '.' +
     MurmurHash3(__filename)
-      .hash(String(id))
+      .hash(String(process.pid))
+      .hash(String(threadId))
       .hash(String(++invocations))
       .result()
 }
