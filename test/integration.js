@@ -118,7 +118,7 @@ test('writes to symlinks without clobbering (async)', function (t) {
 
 test('runs chown on given file (async)', function (t) {
   var file = tmpFile()
-  didWriteFileAtomic(t, {uid: 42, gid: 43}, file, '42', { chown: { uid: 42, gid: 43 } }, function (err) {
+  didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '42', { chown: { uid: 42, gid: 43 } }, function (err) {
     t.ifError(err, 'no error')
     t.is(readFile(file), '42', 'content ok')
     t.done()
@@ -132,7 +132,7 @@ test('runs chmod on given file (async)', function (t) {
     t.ifError(err, 'no error')
     var stat = fs.statSync(file)
     t.is(stat.mode, parseInt('100741', 8))
-    didWriteFileAtomic(t, {uid: 42, gid: 43}, file, '23', { chown: { uid: 42, gid: 43 } }, function (err) {
+    didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '23', { chown: { uid: 42, gid: 43 } }, function (err) {
       t.ifError(err, 'no error')
     })
   })
@@ -141,7 +141,7 @@ test('runs chmod on given file (async)', function (t) {
 test('run chmod AND chown (async)', function (t) {
   t.plan(3)
   var file = tmpFile()
-  didWriteFileAtomic(t, {uid: 42, gid: 43}, file, '42', { mode: parseInt('741', 8), chown: {uid: 42, gid: 43} }, function (err) {
+  didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '42', { mode: parseInt('741', 8), chown: { uid: 42, gid: 43 } }, function (err) {
     t.ifError(err, 'no error')
     var stat = fs.statSync(file)
     t.is(stat.mode, parseInt('100741', 8))
@@ -165,18 +165,18 @@ test('does not change chmod by default (async)', function (t) {
 test('does not change chown by default (async)', function (t) {
   t.plan(6)
   var file = tmpFile()
-  didWriteFileAtomic(t, {uid: 42, gid: 43}, file, '42', { chown: { uid: 42, gid: 43 } }, _setModeOnly)
+  didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '42', { chown: { uid: 42, gid: 43 } }, _setModeOnly)
 
   function _setModeOnly (err) {
     t.ifError(err, 'no error')
 
-    didWriteFileAtomic(t, {uid: 42, gid: 43}, file, '43', { mode: parseInt('741', 8) }, _allDefault)
+    didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '43', { mode: parseInt('741', 8) }, _allDefault)
   }
 
   function _allDefault (err) {
     t.ifError(err, 'no error')
 
-    didWriteFileAtomic(t, {uid: 42, gid: 43}, file, '43', _noError)
+    didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '43', _noError)
   }
 
   function _noError (err) {
@@ -220,7 +220,7 @@ test('writes to symlinks without clobbering (sync)', function (t) {
 test('runs chown on given file (sync)', function (t) {
   t.plan(1)
   var file = tmpFile()
-  didWriteFileAtomicSync(t, {uid: 42, gid: 43}, file, '42', { chown: { uid: 42, gid: 43 } })
+  didWriteFileAtomicSync(t, { uid: 42, gid: 43 }, file, '42', { chown: { uid: 42, gid: 43 } })
 })
 
 test('runs chmod on given file (sync)', function (t) {
@@ -229,13 +229,13 @@ test('runs chmod on given file (sync)', function (t) {
   didWriteFileAtomicSync(t, {}, file, '42', { mode: parseInt('741', 8) })
   var stat = fs.statSync(file)
   t.is(stat.mode, parseInt('100741', 8))
-  didWriteFileAtomicSync(t, {uid: 42, gid: 43}, file, '23', { chown: { uid: 42, gid: 43 } })
+  didWriteFileAtomicSync(t, { uid: 42, gid: 43 }, file, '23', { chown: { uid: 42, gid: 43 } })
 })
 
 test('runs chown and chmod (sync)', function (t) {
   t.plan(2)
   var file = tmpFile()
-  didWriteFileAtomicSync(t, {uid: 42, gid: 43}, file, '42', { mode: parseInt('741', 8), chown: { uid: 42, gid: 43 } })
+  didWriteFileAtomicSync(t, { uid: 42, gid: 43 }, file, '42', { mode: parseInt('741', 8), chown: { uid: 42, gid: 43 } })
   var stat = fs.statSync(file)
   t.is(stat.mode, parseInt('100741', 8))
 })
@@ -252,9 +252,9 @@ test('does not change chmod by default (sync)', function (t) {
 test('does not change chown by default (sync)', function (t) {
   t.plan(3)
   var file = tmpFile()
-  didWriteFileAtomicSync(t, {uid: 42, gid: 43}, file, '42', { chown: { uid: 42, gid: 43 } })
-  didWriteFileAtomicSync(t, {uid: 42, gid: 43}, file, '43', { mode: parseInt('741', 8) })
-  didWriteFileAtomicSync(t, {uid: 42, gid: 43}, file, '44')
+  didWriteFileAtomicSync(t, { uid: 42, gid: 43 }, file, '42', { chown: { uid: 42, gid: 43 } })
+  didWriteFileAtomicSync(t, { uid: 42, gid: 43 }, file, '43', { mode: parseInt('741', 8) })
+  didWriteFileAtomicSync(t, { uid: 42, gid: 43 }, file, '44')
 })
 
 test('cleanup', function (t) {

@@ -98,7 +98,7 @@ test('cleanupOnExit', function (t) {
 
 test('async tests', function (t) {
   t.plan(12)
-  writeFileAtomic('good', 'test', {mode: '0777'}, function (err) {
+  writeFileAtomic('good', 'test', { mode: '0777' }, function (err) {
     t.notOk(err, 'No errors occur when passing in options')
   })
   writeFileAtomic('good', 'test', function (err) {
@@ -113,7 +113,7 @@ test('async tests', function (t) {
   writeFileAtomic('nowrite', Buffer.from('test', 'utf8'), function (err) {
     t.is(err && err.message, 'ENOWRITE', 'fs.writewrite failures propagate for buffers')
   })
-  writeFileAtomic('nochown', 'test', {chown: {uid: 100, gid: 100}}, function (err) {
+  writeFileAtomic('nochown', 'test', { chown: { uid: 100, gid: 100 } }, function (err) {
     t.is(err && err.message, 'ENOCHOWN', 'Chown failures propagate')
   })
   writeFileAtomic('nochown', 'test', function (err) {
@@ -122,7 +122,7 @@ test('async tests', function (t) {
   writeFileAtomic('nochmod', 'test', { mode: parseInt('741', 8) }, function (err) {
     t.is(err && err.message, 'ENOCHMOD', 'Chmod failures propagate')
   })
-  writeFileAtomic('nofsyncopt', 'test', {fsync: false}, function (err) {
+  writeFileAtomic('nofsyncopt', 'test', { fsync: false }, function (err) {
     t.notOk(err, 'fsync skipped if options.fsync is false')
   })
   writeFileAtomic('norename', 'test', function (err) {
@@ -150,13 +150,13 @@ test('sync tests', function (t) {
   }
 
   noexception('No errors occur when passing in options', function () {
-    writeFileAtomicSync('good', 'test', {mode: '0777'})
+    writeFileAtomicSync('good', 'test', { mode: '0777' })
   })
   noexception('No errors occur when NOT passing in options', function () {
     writeFileAtomicSync('good', 'test')
   })
   noexception('fsync never called if options.fsync is falsy', function () {
-    writeFileAtomicSync('good', 'test', {fsync: false})
+    writeFileAtomicSync('good', 'test', { fsync: false })
   })
   throws('ENOWRITE', 'fs.writeSync failures propagate', function () {
     writeFileAtomicSync('nowrite', 'test')
@@ -165,7 +165,7 @@ test('sync tests', function (t) {
     writeFileAtomicSync('noopen', 'test')
   })
   throws('ENOCHOWN', 'Chown failures propagate', function () {
-    writeFileAtomicSync('nochown', 'test', {chown: {uid: 100, gid: 100}})
+    writeFileAtomicSync('nochown', 'test', { chown: { uid: 100, gid: 100 } })
   })
   noexception('No attempt to chown when no uid/gid passed in', function () {
     writeFileAtomicSync('nochown', 'test')
@@ -190,7 +190,7 @@ test('promise injection', function (t) {
       return super.then.apply(this, arguments)
     }
   }
-  writeFileAtomic('good', 'test', {Promise: customPromise}, function (err) {
+  writeFileAtomic('good', 'test', { Promise: customPromise }, function (err) {
     t.notOk(err, 'no errors occur when providing customPromise')
     t.true(usedCustomPromise, 'the custom promise was injected and used')
   })
