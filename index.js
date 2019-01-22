@@ -10,11 +10,26 @@ var onExit = require('signal-exit')
 var path = require('path')
 var activeFiles = {}
 
+// if we run inside of a worker_thread, `process.pid` is not unique
+var id = (function getId () {
+  try {
+    var workerThreads = require('worker_threads')
+
+    if (workerThreads.isMainThread) {
+      return process.pid
+    }
+
+    return workerThreads.threadId || process.pid
+  } catch (e) {
+    return process.pid
+  }
+})()
+
 var invocations = 0
 function getTmpname (filename) {
   return filename + '.' +
     MurmurHash3(__filename)
-      .hash(String(process.pid))
+      .hash(String(id))
       .hash(String(++invocations))
       .result()
 }
