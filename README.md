@@ -22,7 +22,7 @@ Atomically and asynchronously writes data to a file, replacing the file if it al
 exists.  data can be a string or a buffer.
 
 The file is initially named `filename + "." + murmurhex(__filename, process.pid, ++invocations)`.
-Note that `process.pid` is replaced by `require('worker_threads').threadId` if running inside of a worker thread.
+Note that `require('worker_threads').threadId` is used in addition to `process.pid` if running inside of a worker thread.
 If writeFile completes successfully then, if passed the **chown** option it will change
 the ownership of the file. Finally it renames the file back to the filename you specified. If
 it encounters errors at any of these steps it will attempt to unlink the temporary file and then
