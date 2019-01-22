@@ -16,12 +16,10 @@ var threadId = (function getId () {
   try {
     var workerThreads = require('worker_threads')
 
-    if (workerThreads.isMainThread) {
-      return 0
-    }
-
-    return workerThreads.threadId || 0
+    /// if we are in main thread, this is set to `0`
+    return workerThreads.threadId
   } catch (e) {
+    // worker_threads are not available, fallback to 0
     return 0
   }
 })()
