@@ -180,27 +180,30 @@ function writeFileSync (filename, data, options) {
   }
   var tmpfile = getTmpname(filename)
 
-  try {
-    if (!options.mode || !options.chown) {
-      // Either mode or chown is not explicitly set
-      // Default behavior is to copy it from original file
-      try {
-        var stats = fs.statSync(filename)
-        options = Object.assign({}, options)
-        if (!options.mode) {
-          options.mode = stats.mode
-        }
-        if (!options.chown && process.getuid) {
-          options.chown = { uid: stats.uid, gid: stats.gid }
-        }
-      } catch (ex) {
-        // ignore stat errors
+  if (!options.mode || !options.chown) {
+    // Either mode or chown is not explicitly set
+    // Default behavior is to copy it from original file
+    try {
+      var stats = fs.statSync(filename)
+      options = Object.assign({}, options)
+      if (!options.mode) {
+        options.mode = stats.mode
       }
+      if (!options.chown && process.getuid) {
+        options.chown = { uid: stats.uid, gid: stats.gid }
+      }
+    } catch (ex) {
+      // ignore stat errors
     }
+  }
 
-    var cleanup = cleanupOnExit(tmpfile)
-    var removeOnExitHandler = onExit(cleanup)
-    var fd = fs.openSync(tmpfile, 'w', options.mode)
+  var fd
+  var cleanup = cleanupOnExit(tmpfile)
+  var removeOnExitHandler = onExit(cleanup)
+
+  try {
+
+    fd = fs.openSync(tmpfile, 'w', options.mode)
     if (Buffer.isBuffer(data)) {
       fs.writeSync(fd, data, 0, data.length, 0)
     } else if (data != null) {
@@ -215,6 +218,7 @@ function writeFileSync (filename, data, options) {
     fs.renameSync(tmpfile, filename)
     removeOnExitHandler()
   } catch (err) {
+    if (fd) fs.closeSync(fd)
     removeOnExitHandler()
     cleanup()
     throw err
