@@ -58,7 +58,8 @@ function writeFile (filename, data, options, callback) {
   var truename
   var fd
   var tmpfile
-  var removeOnExit = cleanupOnExit(() => tmpfile)
+  /* istanbul ignore next -- The closure only gets called when onExit triggers */
+  var removeOnExitHandler = onExit(cleanupOnExit(() => tmpfile))
   var absoluteName = path.resolve(filename)
 
   new Promise(function serializeSameFile (resolve) {
@@ -154,9 +155,10 @@ function writeFile (filename, data, options, callback) {
       })
     })
   }).then(function success () {
+    removeOnExitHandler()
     callback()
   }).catch(function fail (err) {
-    removeOnExit()
+    removeOnExitHandler()
     fs.unlink(tmpfile, function () {
       callback(err)
     })
@@ -196,7 +198,8 @@ function writeFileSync (filename, data, options) {
       }
     }
 
-    var removeOnExit = onExit(cleanupOnExit(tmpfile))
+    var cleanup = cleanupOnExit(tmpfile)
+    var removeOnExitHandler = onExit(cleanup)
     var fd = fs.openSync(tmpfile, 'w', options.mode)
     if (Buffer.isBuffer(data)) {
       fs.writeSync(fd, data, 0, data.length, 0)
@@ -210,10 +213,10 @@ function writeFileSync (filename, data, options) {
     if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
     if (options.mode) fs.chmodSync(tmpfile, options.mode)
     fs.renameSync(tmpfile, filename)
-    removeOnExit()
+    removeOnExitHandler()
   } catch (err) {
-    removeOnExit()
-    try { fs.unlinkSync(tmpfile) } catch (e) {}
+    removeOnExitHandler()
+    cleanup()
     throw err
   }
 }
