@@ -1,3 +1,7 @@
+# 2.4.1
+
+* Fix a bug where `signal-exit` instances would be leaked. This was fixed when addressing #35.
+
 # 2.4.0
 
 ## Features
