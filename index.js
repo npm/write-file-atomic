@@ -209,7 +209,6 @@ function writeFileSync (filename, data, options) {
   var removeOnExitHandler = onExit(cleanup)
 
   try {
-
     fd = fs.openSync(tmpfile, 'w', options.mode)
     if (Buffer.isBuffer(data)) {
       fs.writeSync(fd, data, 0, data.length, 0)
