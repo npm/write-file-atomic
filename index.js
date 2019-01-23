@@ -121,15 +121,18 @@ function writeFile (filename, data, options, callback) {
       } else resolve()
     })
   }).then(function syncAndClose () {
-    if (options.fsync !== false) {
-      return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
+      if (options.fsync !== false) {
         fs.fsync(fd, function (err) {
-          if (err) reject(err)
+          if (err) fs.close(fd, () => reject(err))
           else fs.close(fd, resolve)
         })
-      })
-    }
+      } else {
+        fs.close(fd, resolve)
+      }
+    })
   }).then(function chown () {
+    fd = null
     if (options.chown) {
       return new Promise(function (resolve, reject) {
         fs.chown(tmpfile, options.chown.uid, options.chown.gid, function (err) {
@@ -158,9 +161,13 @@ function writeFile (filename, data, options, callback) {
     removeOnExitHandler()
     callback()
   }, function fail (err) {
-    removeOnExitHandler()
-    fs.unlink(tmpfile, function () {
-      callback(err)
+    return new Promise(resolve => {
+      return fd ? fs.close(fd, resolve) : resolve()
+    }).then(() => {
+      removeOnExitHandler()
+      fs.unlink(tmpfile, function () {
+        callback(err)
+      })
     })
   }).then(function checkQueue () {
     activeFiles[absoluteName].shift() // remove the element added by serializeSameFile
