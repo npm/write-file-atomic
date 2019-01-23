@@ -157,7 +157,7 @@ function writeFile (filename, data, options, callback) {
   }).then(function success () {
     removeOnExitHandler()
     callback()
-  }).catch(function fail (err) {
+  }, function fail (err) {
     removeOnExitHandler()
     fs.unlink(tmpfile, function () {
       callback(err)
