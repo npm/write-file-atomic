@@ -224,7 +224,11 @@ function writeFileSync (filename, data, options) {
     fs.renameSync(tmpfile, filename)
     removeOnExitHandler()
   } catch (err) {
-    if (fd) fs.closeSync(fd)
+    if (fd) {
+      try {
+        fs.closeSync(fd)
+      } catch(e) {}
+    }
     removeOnExitHandler()
     cleanup()
     throw err
