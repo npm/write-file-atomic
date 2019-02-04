@@ -227,7 +227,9 @@ function writeFileSync (filename, data, options) {
     if (fd) {
       try {
         fs.closeSync(fd)
-      } catch(e) {}
+      } catch (ex) {
+        // ignore close errors at this stage, error may have closed fd already.
+      }
     }
     removeOnExitHandler()
     cleanup()
