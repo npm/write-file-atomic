@@ -8,6 +8,7 @@ var fs = require('graceful-fs')
 var MurmurHash3 = require('imurmurhash')
 var onExit = require('signal-exit')
 var path = require('path')
+var isTypedArray = require('is-typedarray')
 var activeFiles = {}
 
 // if we run inside of a worker_thread, `process.pid` is not unique
@@ -108,7 +109,7 @@ function writeFile (filename, data, options, callback) {
     })
   }).then(function write () {
     return new Promise(function (resolve, reject) {
-      if (Buffer.isBuffer(data)) {
+      if (Buffer.isBuffer(data) || isTypedArray(data)) {
         fs.write(fd, data, 0, data.length, 0, function (err) {
           if (err) reject(err)
           else resolve()
@@ -210,7 +211,7 @@ function writeFileSync (filename, data, options) {
 
   try {
     fd = fs.openSync(tmpfile, 'w', options.mode)
-    if (Buffer.isBuffer(data)) {
+    if (Buffer.isBuffer(data) || isTypedArray(data)) {
       fs.writeSync(fd, data, 0, data.length, 0)
     } else if (data != null) {
       fs.writeSync(fd, String(data), 0, String(options.encoding || 'utf8'))
