@@ -102,6 +102,15 @@ test('writes buffers to simple file (async)', function (t) {
   })
 })
 
+test('writes TypedArray to simple file (async)', function (t) {
+  t.plan(3)
+  var file = tmpFile()
+  didWriteFileAtomic(t, {}, file, new Uint8Array([0x34, 0x32]), function (err) {
+    t.ifError(err, 'no error')
+    t.is(readFile(file), '42', 'content ok')
+  })
+})
+
 test('writes undefined to simple file (async)', function (t) {
   t.plan(3)
   var file = tmpFile()
@@ -221,6 +230,13 @@ test('writes simple buffer file (sync)', function (t) {
   t.plan(2)
   var file = tmpFile()
   didWriteFileAtomicSync(t, {}, file, Buffer.from('42'))
+  t.is(readFile(file), '42')
+})
+
+test('writes simple TypedArray file (sync)', function (t) {
+  t.plan(2)
+  var file = tmpFile()
+  didWriteFileAtomicSync(t, {}, file, new Uint8Array([0x34, 0x32]))
   t.is(readFile(file), '42')
 })
 

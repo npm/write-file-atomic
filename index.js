@@ -8,6 +8,8 @@ var fs = require('fs')
 var MurmurHash3 = require('imurmurhash')
 var onExit = require('signal-exit')
 var path = require('path')
+var isTypedArray = require('is-typedarray')
+var typedArrayToBuffer = require('typedarray-to-buffer')
 var activeFiles = {}
 
 // if we run inside of a worker_thread, `process.pid` is not unique
@@ -108,6 +110,9 @@ function writeFile (filename, data, options, callback) {
     })
   }).then(function write () {
     return new Promise(function (resolve, reject) {
+      if (isTypedArray(data)) {
+        data = typedArrayToBuffer(data)
+      }
       if (Buffer.isBuffer(data)) {
         fs.write(fd, data, 0, data.length, 0, function (err) {
           if (err) reject(err)
@@ -210,6 +215,9 @@ function writeFileSync (filename, data, options) {
 
   try {
     fd = fs.openSync(tmpfile, 'w', options.mode)
+    if (isTypedArray(data)) {
+      data = typedArrayToBuffer(data)
+    }
     if (Buffer.isBuffer(data)) {
       fs.writeSync(fd, data, 0, data.length, 0)
     } else if (data != null) {

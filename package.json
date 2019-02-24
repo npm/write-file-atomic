@@ -23,7 +23,9 @@
   "homepage": "https://github.com/iarna/write-file-atomic",
   "dependencies": {
     "imurmurhash": "^0.1.4",
-    "signal-exit": "^3.0.2"
+    "is-typedarray": "^1.0.0",
+    "signal-exit": "^3.0.2",
+    "typedarray-to-buffer": "^3.1.5"
   },
   "devDependencies": {
     "mkdirp": "^0.5.1",
