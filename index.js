@@ -53,7 +53,11 @@ function writeFile (filename, data, options, callback) {
   } else {
     options = {}
   }
-
+  
+  if (typeof callback === 'undefined') {
+    callback = () => {}
+  }
+  
   var Promise = options.Promise || global.Promise
   var truename
   var fd
@@ -162,18 +166,22 @@ function writeFile (filename, data, options, callback) {
     callback()
   }, function fail (err) {
     return new Promise(resolve => {
-      return fd ? fs.close(fd, resolve) : resolve()
-    }).then(() => {
-      removeOnExitHandler()
-      fs.unlink(tmpfile, function () {
-        callback(err)
-      })
+      return fd ? fs.close(fd, () => {
+        removeOnExitHandler()
+        fs.unlink(tmpfile, function () {
+          callback(err)
+          resolve(err)
+        })
+      }) : resolve()
     })
-  }).then(function checkQueue () {
+  }).then(function checkQueue (err) {
     activeFiles[absoluteName].shift() // remove the element added by serializeSameFile
     if (activeFiles[absoluteName].length > 0) {
       activeFiles[absoluteName][0]() // start next job if one is pending
     } else delete activeFiles[absoluteName]
+    if (typeof err !== 'undefined') {
+      return Promise.reject(err)
+    }
   })
 }
 
