@@ -53,11 +53,11 @@ function writeFile (filename, data, options, callback) {
   } else {
     options = {}
   }
-  
+
   if (typeof callback === 'undefined') {
     callback = () => {}
   }
-  
+
   var Promise = options.Promise || global.Promise
   var truename
   var fd
