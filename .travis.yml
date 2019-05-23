@@ -8,6 +8,8 @@ matrix:
   allow_failures:
     - os: osx
 node_js:
+  - "node"
+  - "12"
+  - "10"
+  - "8"
   - "6"
-  - "7"
-  - "4"
