@@ -2,8 +2,8 @@
 var test = require('tap').test
 var requireInject = require('require-inject')
 
-// defining mock for gracefulFs so its functions can be modified
-var gracefulFs = {
+// defining mock for fs so its functions can be modified
+var fs = {
   realpath: function (filename, cb) {
     return cb(null, filename)
   },
@@ -73,23 +73,23 @@ var gracefulFs = {
 }
 
 var writeFileAtomic = requireInject('../index', {
-  'graceful-fs': gracefulFs
+  'fs': fs
 })
 
 // preserve original functions
-var oldRealPath = gracefulFs.realpath
-var oldRename = gracefulFs.rename
+var oldRealPath = fs.realpath
+var oldRename = fs.rename
 
 test('ensure writes to the same file are serial', function (t) {
   var fileInUse = false
   var ops = 5 // count for how many concurrent write ops to request
   t.plan(ops * 3 + 3)
-  gracefulFs.realpath = function () {
+  fs.realpath = function () {
     t.false(fileInUse, 'file not in use')
     fileInUse = true
     oldRealPath.apply(writeFileAtomic, arguments)
   }
-  gracefulFs.rename = function () {
+  fs.rename = function () {
     t.true(fileInUse, 'file in use')
     fileInUse = false
     oldRename.apply(writeFileAtomic, arguments)
@@ -112,14 +112,14 @@ test('allow write to multiple files in parallel, but same file writes are serial
   var filesInUse = []
   var ops = 5
   var wasParallel = false
-  gracefulFs.realpath = function (filename) {
+  fs.realpath = function (filename) {
     filesInUse.push(filename)
     var firstOccurence = filesInUse.indexOf(filename)
     t.equal(filesInUse.indexOf(filename, firstOccurence + 1), -1, 'serial writes') // check for another occurence after the first
     if (filesInUse.length > 1) wasParallel = true // remember that a parallel operation took place
     oldRealPath.apply(writeFileAtomic, arguments)
   }
-  gracefulFs.rename = function (filename) {
+  fs.rename = function (filename) {
     filesInUse.splice(filesInUse.indexOf(filename), 1)
     oldRename.apply(writeFileAtomic, arguments)
   }

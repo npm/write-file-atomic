@@ -4,7 +4,7 @@ module.exports.sync = writeFileSync
 module.exports._getTmpname = getTmpname // for testing
 module.exports._cleanupOnExit = cleanupOnExit
 
-var fs = require('graceful-fs')
+var fs = require('fs')
 var MurmurHash3 = require('imurmurhash')
 var onExit = require('signal-exit')
 var path = require('path')

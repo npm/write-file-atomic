@@ -1,5 +1,5 @@
 'use strict'
-var fs = require('graceful-fs')
+var fs = require('fs')
 var path = require('path')
 var test = require('tap').test
 var mkdirp = require('mkdirp')
@@ -24,7 +24,7 @@ function didWriteFileAtomic (t, expected, filename, data, options, callback) {
   if (!options) options = {}
   var actual = {}
   var writeFileAtomic = requireInject('../index.js', {
-    'graceful-fs': Object.assign({}, fs, {
+    'fs': Object.assign({}, fs, {
       chown: function mockChown (filename, uid, gid, cb) {
         actual.uid = uid
         actual.gid = gid
@@ -47,7 +47,7 @@ function didWriteFileAtomic (t, expected, filename, data, options, callback) {
 function didWriteFileAtomicSync (t, expected, filename, data, options) {
   var actual = {}
   var writeFileAtomic = requireInject('../index.js', {
-    'graceful-fs': Object.assign({}, fs, {
+    'fs': Object.assign({}, fs, {
       chownSync: function mockChownSync (filename, uid, gid) {
         actual.uid = uid
         actual.gid = gid

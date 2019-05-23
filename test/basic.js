@@ -4,7 +4,7 @@ var requireInject = require('require-inject')
 
 var unlinked = []
 var writeFileAtomic = requireInject('../index', {
-  'graceful-fs': {
+  'fs': {
     realpath: function (filename, cb) {
       return cb(null, filename)
     },
