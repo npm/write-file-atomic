@@ -27,8 +27,8 @@
   },
   "devDependencies": {
     "mkdirp": "^0.5.1",
-    "require-inject": "^1.4.0",
-    "rimraf": "^2.5.4",
+    "require-inject": "^1.4.4",
+    "rimraf": "^2.6.3",
     "standard": "^12.0.1",
     "tap": "^12.7.0"
   },
