@@ -30,7 +30,7 @@
     "require-inject": "^1.4.0",
     "rimraf": "^2.5.4",
     "standard": "^12.0.1",
-    "tap": "^12.1.3"
+    "tap": "^12.7.0"
   },
   "files": [
     "index.js"
