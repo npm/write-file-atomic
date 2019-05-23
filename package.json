@@ -4,7 +4,7 @@
   "description": "Write files in an atomic fashion w/configurable ownership",
   "main": "index.js",
   "scripts": {
-    "test": "standard && tap --100 test/*.js",
+    "test": "standard && tap --100 test/*.js -J",
     "posttest": "rimraf chowncopy good nochmod nochown nofsync nofsyncopt noopen norename \"norename nounlink\" nowrite"
   },
   "repository": {
