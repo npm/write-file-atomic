@@ -55,7 +55,7 @@ function serializeActiveFile (absoluteName) {
   })
 }
 
-async function writeFileAsync (filename, data, tmpfileStorage, options = {}) {
+async function writeFileAsync (filename, data, options = {}) {
   if (typeof options === 'string') {
     options = { encoding: options }
   }
@@ -87,6 +87,9 @@ async function writeFileAsync (filename, data, tmpfileStorage, options = {}) {
     }
 
     fd = await promisify(fs.open)(tmpfile, 'w', options.mode)
+    if (options.tmpfileCreated) {
+      await options.tmpfileCreated(tmpfile)
+    }
     if (isTypedArray(data)) {
       data = typedArrayToBuffer(data)
     }
@@ -119,7 +122,6 @@ async function writeFileAsync (filename, data, tmpfileStorage, options = {}) {
         () => {}
       )
     }
-    tmpfileStorage.value = tmpfile
     removeOnExitHandler()
     await promisify(fs.unlink)(tmpfile).catch(() => {})
     activeFiles[absoluteName].shift() // remove the element added by serializeSameFile
@@ -127,8 +129,6 @@ async function writeFileAsync (filename, data, tmpfileStorage, options = {}) {
       activeFiles[absoluteName][0]() // start next job if one is pending
     } else delete activeFiles[absoluteName]
   }
-
-  return tmpfile
 }
 
 function writeFile (filename, data, options, callback) {
@@ -137,15 +137,9 @@ function writeFile (filename, data, options, callback) {
     options = {}
   }
 
-  /* This is so we can provide tmpfile to the callback even in the failure condition. */
-  const tmpfileStorage = {}
-  const promise = writeFileAsync(filename, data, tmpfileStorage, options)
-  /* istanbul ignore else */
+  const promise = writeFileAsync(filename, data, options)
   if (callback) {
-    promise.then(
-      tmpfile => callback(null, tmpfile),
-      err => callback(err, tmpfileStorage.value)
-    )
+    promise.then(callback, callback)
   }
 
   return promise
@@ -184,6 +178,9 @@ function writeFileSync (filename, data, options) {
 
   try {
     fd = fs.openSync(tmpfile, 'w', options.mode)
+    if (options.tmpfileCreated) {
+      options.tmpfileCreated(tmpfile)
+    }
     if (isTypedArray(data)) {
       data = typedArrayToBuffer(data)
     }
@@ -200,7 +197,6 @@ function writeFileSync (filename, data, options) {
     if (options.mode) fs.chmodSync(tmpfile, options.mode)
     fs.renameSync(tmpfile, filename)
     removeOnExitHandler()
-    return tmpfile
   } catch (err) {
     if (fd) {
       try {

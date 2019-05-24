@@ -15,6 +15,7 @@ atomic and allows you set ownership (uid/gid of the file).
   * encoding **String** | **Null** default = 'utf8'
   * fsync **Boolean** default = true
   * mode **Number** default, from existing file, if any
+  * tmpfileCreated **Function** called when the tmpfile is created
 * callback **Function**
 
 Atomically and asynchronously writes data to a file, replacing the file if it already
@@ -41,9 +42,7 @@ If options is a String, it's assumed to be the **encoding** option. The **encodi
 
 If the **fsync** option is **false**, writeFile will skip the final fsync call.
 
-The callback is always invoked with the initial (temporary) filename.  Note
-that by the time the callback is executed, the temporary file has already
-been deleted.
+If the **tmpfileCreated** option is specified it will be called with the name of the tmpfile when created.
 
 Example:
 
@@ -70,6 +69,4 @@ This function also supports async/await:
 
 ### var writeFileAtomicSync = require('write-file-atomic').sync<br>writeFileAtomicSync(filename, data, [options])
 
-The synchronous version of **writeFileAtomic**. Returns the initial
-(temporary) filename.  Note that by the time the function returns, the
-temporary file has already been deleted.
+The synchronous version of **writeFileAtomic**.
