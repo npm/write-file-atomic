@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:iarna/write-file-atomic.git"
+    "url": "git://github.com/npm/write-file-atomic.git"
   },
   "keywords": [
     "writeFile",
@@ -22,9 +22,9 @@
   "author": "Rebecca Turner <me@re-becca.org> (http://re-becca.org)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/iarna/write-file-atomic/issues"
+    "url": "https://github.com/npm/write-file-atomic/issues"
   },
-  "homepage": "https://github.com/iarna/write-file-atomic",
+  "homepage": "https://github.com/npm/write-file-atomic",
   "dependencies": {
     "imurmurhash": "^0.1.4",
     "is-typedarray": "^1.0.0",
