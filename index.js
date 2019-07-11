@@ -178,7 +178,7 @@ function writeFileSync (filename, data, options) {
 
   let threw = true
   try {
-    fd = fs.openSync(tmpfile, 'w', options.mode)
+    fd = fs.openSync(tmpfile, 'w', options.mode || 0o666)
     if (options.tmpfileCreated) {
       options.tmpfileCreated(tmpfile)
     }
