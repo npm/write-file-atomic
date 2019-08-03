@@ -102,7 +102,7 @@ async function writeFileAsync (filename, data, options = {}) {
     if (options.fsync !== false) {
       await promisify(fs.fsync)(fd)
     }
-    
+
     await promisify(fs.close)(fd).catch(
       /* istanbul ignore next */
       () => {}
