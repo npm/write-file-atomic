@@ -13,7 +13,7 @@
 # 2.4.2
 
 * A pair of patches to fix some fd leaks.  We would leak fds with sync use
-  when errors occured and with async use any time fsync was not in use. (#34)
+  when errors occurred and with async use any time fsync was not in use. (#34)
 
 # 2.4.1
 
