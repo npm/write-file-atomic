@@ -55,6 +55,19 @@ function serializeActiveFile (absoluteName) {
   })
 }
 
+// https://github.com/isaacs/node-graceful-fs/blob/master/polyfills.js#L315-L342
+function isChownErrOk (err) {
+  if (!err) { return true }
+  if (err.code === 'ENOSYS') { return true }
+
+  const nonroot = !process.getuid || process.getuid() !== 0
+  if (nonroot) {
+    if (err.code === 'EINVAL' || err.code === 'EPERM') { return true }
+  }
+
+  return false
+}
+
 async function writeFileAsync (filename, data, options = {}) {
   if (typeof options === 'string') {
     options = { encoding: options }
@@ -105,11 +118,19 @@ async function writeFileAsync (filename, data, options = {}) {
 
     fd = null
     if (options.chown) {
-      await promisify(fs.chown)(tmpfile, options.chown.uid, options.chown.gid)
+      try {
+        await promisify(fs.chown)(tmpfile, options.chown.uid, options.chown.gid)
+      } catch (err) {
+        if (!isChownErrOk(err)) throw err
+      }
     }
 
     if (options.mode) {
-      await promisify(fs.chmod)(tmpfile, options.mode)
+      try {
+        await promisify(fs.chmod)(tmpfile, options.mode)
+      } catch (err) {
+        if (!isChownErrOk(err)) throw err
+      }
     }
 
     await promisify(fs.rename)(tmpfile, truename)
@@ -193,8 +214,23 @@ function writeFileSync (filename, data, options) {
       fs.fsyncSync(fd)
     }
     fs.closeSync(fd)
-    if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
-    if (options.mode) fs.chmodSync(tmpfile, options.mode)
+
+    if (options.chown) {
+      try {
+        fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
+      } catch (err) {
+        if (!isChownErrOk(err)) throw err
+      }
+    }
+
+    if (options.mode) {
+      try {
+        fs.chmodSync(tmpfile, options.mode)
+      } catch (err) {
+        if (!isChownErrOk(err)) throw err
+      }
+    }
+
     fs.renameSync(tmpfile, filename)
     removeOnExitHandler()
   } catch (err) {
