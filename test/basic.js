@@ -2,6 +2,10 @@
 const { test } = require('tap')
 const requireInject = require('require-inject')
 
+let expectClose = 0
+let closeCalled = 0
+let expectCloseSync = 0
+let closeSyncCalled = 0
 let unlinked = []
 const writeFileAtomic = requireInject('../index', {
   'fs': {
@@ -10,6 +14,7 @@ const writeFileAtomic = requireInject('../index', {
     },
     open (tmpfile, options, mode, cb) {
       if (/noopen/.test(tmpfile)) return cb(new Error('ENOOPEN'))
+      expectClose++
       cb(null, tmpfile)
     },
     write (fd) {
@@ -21,7 +26,10 @@ const writeFileAtomic = requireInject('../index', {
       if (/nofsync/.test(fd)) return cb(new Error('ENOFSYNC'))
       cb()
     },
-    close (fd, cb) { cb() },
+    close (fd, cb) {
+      closeCalled++
+      cb()
+    },
     chown (tmpfile, uid, gid, cb) {
       if (/nochown/.test(tmpfile)) return cb(new Error('ENOCHOWN'))
       cb()
@@ -47,6 +55,7 @@ const writeFileAtomic = requireInject('../index', {
     },
     openSync (tmpfile, options) {
       if (/noopen/.test(tmpfile)) throw new Error('ENOOPEN')
+      expectCloseSync++
       return tmpfile
     },
     writeSync (fd) {
@@ -55,7 +64,9 @@ const writeFileAtomic = requireInject('../index', {
     fsyncSync (fd) {
       if (/nofsync/.test(fd)) throw new Error('ENOFSYNC')
     },
-    closeSync () { },
+    closeSync (fd) {
+      closeSyncCalled++
+    },
     chownSync (tmpfile, uid, gid) {
       if (/nochown/.test(tmpfile)) throw new Error('ENOCHOWN')
     },
@@ -98,6 +109,15 @@ test('cleanupOnExit', t => {
 
 test('async tests', t => {
   t.plan(14)
+
+  expectClose = 0
+  closeCalled = 0
+  t.teardown(() => {
+    t.parent.equal(closeCalled, expectClose, 'async tests closed all files')
+    expectClose = 0
+    closeCalled = 0
+  })
+
   writeFileAtomic('good', 'test', { mode: '0777' }, err => {
     t.notOk(err, 'No errors occur when passing in options')
   })
@@ -144,6 +164,14 @@ test('async tests', t => {
 
 test('sync tests', t => {
   t.plan(16)
+  closeSyncCalled = 0
+  expectCloseSync = 0
+  t.teardown(() => {
+    t.parent.equal(closeSyncCalled, expectCloseSync, 'sync closed all files')
+    expectCloseSync = 0
+    closeSyncCalled = 0
+  })
+
   const throws = function (shouldthrow, msg, todo) {
     let err
     try { todo() } catch (e) { err = e }
@@ -218,6 +246,14 @@ test('sync tests', t => {
 
 test('promises', async t => {
   let tmpfile
+  closeCalled = 0
+  expectClose = 0
+  t.teardown(() => {
+    t.parent.equal(closeCalled, expectClose, 'promises closed all files')
+    closeCalled = 0
+    expectClose = 0
+  })
+
   await writeFileAtomic('good', 'test', {
     tmpfileCreated (gottmpfile) {
       tmpfile = gottmpfile

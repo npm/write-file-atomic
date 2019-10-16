@@ -103,7 +103,9 @@ async function writeFileAsync (filename, data, options = {}) {
       await promisify(fs.fsync)(fd)
     }
 
+    await promisify(fs.close)(fd)
     fd = null
+
     if (options.chown) {
       await promisify(fs.chown)(tmpfile, options.chown.uid, options.chown.gid)
     }
@@ -113,8 +115,6 @@ async function writeFileAsync (filename, data, options = {}) {
     }
 
     await promisify(fs.rename)(tmpfile, truename)
-
-    removeOnExitHandler()
   } finally {
     if (fd) {
       await promisify(fs.close)(fd).catch(
@@ -176,6 +176,7 @@ function writeFileSync (filename, data, options) {
   const cleanup = cleanupOnExit(tmpfile)
   const removeOnExitHandler = onExit(cleanup)
 
+  let threw = true
   try {
     fd = fs.openSync(tmpfile, 'w', options.mode)
     if (options.tmpfileCreated) {
@@ -193,11 +194,12 @@ function writeFileSync (filename, data, options) {
       fs.fsyncSync(fd)
     }
     fs.closeSync(fd)
+    fd = null
     if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
     if (options.mode) fs.chmodSync(tmpfile, options.mode)
     fs.renameSync(tmpfile, filename)
-    removeOnExitHandler()
-  } catch (err) {
+    threw = false
+  } finally {
     if (fd) {
       try {
         fs.closeSync(fd)
@@ -206,7 +208,8 @@ function writeFileSync (filename, data, options) {
       }
     }
     removeOnExitHandler()
-    cleanup()
-    throw err
+    if (threw) {
+      cleanup()
+    }
   }
 }
