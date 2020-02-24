@@ -4,12 +4,13 @@
   "description": "Write files in an atomic fashion w/configurable ownership",
   "main": "index.js",
   "scripts": {
-    "pretest": "standard",
     "test": "tap",
-    "posttest": "rimraf chowncopy good nochmod nochown nofsync nofsyncopt noopen norename \"norename nounlink\" nowrite",
+    "posttest": "npm run lint",
+    "lint": "standard",
+    "postlint": "rimraf chowncopy good nochmod nochown nofsync nofsyncopt noopen norename \"norename nounlink\" nowrite",
     "preversion": "npm test",
     "postversion": "npm publish",
-    "postpublish": "git push origin --follow-tags"
+    "prepublishOnly": "git push origin --follow-tags"
   },
   "repository": {
     "type": "git",
