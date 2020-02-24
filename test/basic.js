@@ -8,7 +8,7 @@ let expectCloseSync = 0
 let closeSyncCalled = 0
 let unlinked = []
 const writeFileAtomic = requireInject('../index', {
-  'fs': {
+  fs: {
     realpath (filename, cb) {
       return cb(null, filename)
     },

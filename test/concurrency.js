@@ -73,7 +73,7 @@ const fs = {
 }
 
 const writeFileAtomic = requireInject('../index', {
-  'fs': fs
+  fs: fs
 })
 
 // preserve original functions
@@ -82,7 +82,7 @@ const oldRename = fs.rename
 
 test('ensure writes to the same file are serial', t => {
   let fileInUse = false
-  let ops = 5 // count for how many concurrent write ops to request
+  const ops = 5 // count for how many concurrent write ops to request
   t.plan(ops * 3 + 3)
   fs.realpath = (...args) => {
     t.false(fileInUse, 'file not in use')
@@ -110,7 +110,7 @@ test('ensure writes to the same file are serial', t => {
 
 test('allow write to multiple files in parallel, but same file writes are serial', t => {
   const filesInUse = []
-  let ops = 5
+  const ops = 5
   let wasParallel = false
   fs.realpath = (filename, ...args) => {
     filesInUse.push(filename)
