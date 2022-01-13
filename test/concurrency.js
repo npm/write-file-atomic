@@ -1,7 +1,5 @@
 'use strict'
-const { test } = require('tap')
-const requireInject = require('require-inject')
-
+const t = require('tap')
 // defining mock for fs so its functions can be modified
 const fs = {
   realpath (filename, cb) {
@@ -72,7 +70,7 @@ const fs = {
   }
 }
 
-const writeFileAtomic = requireInject('../index', {
+const writeFileAtomic = t.mock('../index', {
   fs: fs
 })
 
@@ -80,7 +78,7 @@ const writeFileAtomic = requireInject('../index', {
 const oldRealPath = fs.realpath
 const oldRename = fs.rename
 
-test('ensure writes to the same file are serial', t => {
+t.test('ensure writes to the same file are serial', t => {
   let fileInUse = false
   const ops = 5 // count for how many concurrent write ops to request
   t.plan(ops * 3 + 3)
@@ -108,7 +106,7 @@ test('ensure writes to the same file are serial', t => {
   }, 500)
 })
 
-test('allow write to multiple files in parallel, but same file writes are serial', t => {
+t.test('allow write to multiple files in parallel, but same file writes are serial', t => {
   const filesInUse = []
   const ops = 5
   let wasParallel = false
