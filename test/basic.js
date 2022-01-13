@@ -105,8 +105,8 @@ test('getTmpname', t => {
   const getTmpname = writeFileAtomic._getTmpname
   const a = getTmpname('abc.def')
   const b = getTmpname('abc.def')
-  t.notEqual(a, b, 'different invocations of getTmpname get different results')
-  t.done()
+  t.not(a, b, 'different invocations of getTmpname get different results')
+  t.end()
 })
 
 test('cleanupOnExit', t => {
@@ -114,11 +114,11 @@ test('cleanupOnExit', t => {
   unlinked = []
   const cleanup = writeFileAtomic._cleanupOnExit(() => file)
   cleanup()
-  t.isDeeply(unlinked, [file], 'cleanup code unlinks')
+  t.strictSame(unlinked, [file], 'cleanup code unlinks')
   const cleanup2 = writeFileAtomic._cleanupOnExit('nounlink')
   t.doesNotThrow(cleanup2, 'exceptions are caught')
   unlinked = []
-  t.done()
+  t.end()
 })
 
 test('async tests', t => {
@@ -148,34 +148,34 @@ test('async tests', t => {
       t.notOk(err)
     })
     writeFileAtomic('noopen', 'test', err => {
-      t.is(err && err.message, 'ENOOPEN', 'fs.open failures propagate')
+      t.equal(err && err.message, 'ENOOPEN', 'fs.open failures propagate')
     })
     writeFileAtomic('nowrite', 'test', err => {
-      t.is(err && err.message, 'ENOWRITE', 'fs.writewrite failures propagate')
+      t.equal(err && err.message, 'ENOWRITE', 'fs.writewrite failures propagate')
     })
     writeFileAtomic('nowrite', Buffer.from('test', 'utf8'), err => {
-      t.is(err && err.message, 'ENOWRITE', 'fs.writewrite failures propagate for buffers')
+      t.equal(err && err.message, 'ENOWRITE', 'fs.writewrite failures propagate for buffers')
     })
     writeFileAtomic('nochown', 'test', { chown: { uid: 100, gid: 100 } }, err => {
-      t.is(err && err.message, 'ENOCHOWN', 'Chown failures propagate')
+      t.equal(err && err.message, 'ENOCHOWN', 'Chown failures propagate')
     })
     writeFileAtomic('nochown', 'test', err => {
       t.notOk(err, 'No attempt to chown when no uid/gid passed in')
     })
     writeFileAtomic('nochmod', 'test', { mode: parseInt('741', 8) }, err => {
-      t.is(err && err.message, 'ENOCHMOD', 'Chmod failures propagate')
+      t.equal(err && err.message, 'ENOCHMOD', 'Chmod failures propagate')
     })
     writeFileAtomic('nofsyncopt', 'test', { fsync: false }, err => {
       t.notOk(err, 'fsync skipped if options.fsync is false')
     })
     writeFileAtomic('norename', 'test', err => {
-      t.is(err && err.message, 'ENORENAME', 'Rename errors propagate')
+      t.equal(err && err.message, 'ENORENAME', 'Rename errors propagate')
     })
     writeFileAtomic('norename nounlink', 'test', err => {
-      t.is(err && err.message, 'ENORENAME', 'Failure to unlink the temp file does not clobber the original error')
+      t.equal(err && err.message, 'ENORENAME', 'Failure to unlink the temp file does not clobber the original error')
     })
     writeFileAtomic('nofsync', 'test', err => {
-      t.is(err && err.message, 'ENOFSYNC', 'Fsync failures propagate')
+      t.equal(err && err.message, 'ENOFSYNC', 'Fsync failures propagate')
     })
     writeFileAtomic('enosys', 'test', err => {
       t.notOk(err, 'No errors on ENOSYS')
@@ -223,12 +223,12 @@ test('sync tests', t => {
   const throws = function (t, shouldthrow, msg, todo) {
     let err
     try { todo() } catch (e) { err = e }
-    t.is(shouldthrow, err && err.message, msg)
+    t.equal(shouldthrow, err && err.message, msg)
   }
   const noexception = function (t, msg, todo) {
     let err
     try { todo() } catch (e) { err = e }
-    t.ifError(err, msg)
+    t.error(err, msg)
   }
   let tmpfile
 
@@ -263,7 +263,7 @@ test('sync tests', t => {
         }
       })
     })
-    t.is(tmpfile, undefined, 'tmpfileCreated not called for open failure')
+    t.equal(tmpfile, undefined, 'tmpfileCreated not called for open failure')
 
     throws(t, 'ENOWRITE', 'fs.writeSync failures propagate', () => {
       writeFileAtomicSync('nowrite', 'test', {
@@ -370,7 +370,7 @@ test('promises', async t => {
       tmpfile = gottmpfile
     }
   }))
-  t.is(tmpfile, undefined, 'tmpfileCreated is not called on open failure')
+  t.equal(tmpfile, undefined, 'tmpfileCreated is not called on open failure')
 
   await t.rejects(writeFileAtomic('nowrite', 'test', {
     tmpfileCreated (gottmpfile) {

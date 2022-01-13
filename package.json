@@ -37,12 +37,9 @@
     "require-inject": "^1.4.4",
     "rimraf": "^2.6.3",
     "standard": "^14.3.1",
-    "tap": "^14.10.6"
+    "tap": "^15.1.6"
   },
   "files": [
     "index.js"
-  ],
-  "tap": {
-    "100": true
-  }
+  ]
 }
