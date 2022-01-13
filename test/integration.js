@@ -20,7 +20,9 @@ function didWriteFileAtomic (t, expected, filename, data, options, callback) {
     callback = options
     options = null
   }
-  if (!options) options = {}
+  if (!options) {
+    options = {}
+  }
   const actual = {}
   const writeFileAtomic = t.mock('..', {
     fs: Object.assign({}, fs, {
@@ -31,11 +33,13 @@ function didWriteFileAtomic (t, expected, filename, data, options, callback) {
       },
       stat (filename, cb) {
         fs.stat(filename, (err, stats) => {
-          if (err) return cb(err)
+          if (err) {
+            return cb(err)
+          }
           cb(null, Object.assign(stats, expected || {}))
         })
-      }
-    })
+      },
+    }),
   })
   return writeFileAtomic(filename, data, options, err => {
     t.strictSame(actual, expected, 'ownership is as expected')
@@ -54,8 +58,8 @@ function didWriteFileAtomicSync (t, expected, filename, data, options) {
       statSync (filename) {
         const stats = fs.statSync(filename)
         return Object.assign(stats, expected || {})
-      }
-    })
+      },
+    }),
   })
   writeFileAtomic.sync(filename, data, options)
   t.strictSame(actual, expected)
@@ -64,7 +68,7 @@ function didWriteFileAtomicSync (t, expected, filename, data, options) {
 function currentUser () {
   return {
     uid: process.getuid(),
-    gid: process.getgid()
+    gid: process.getgid(),
   }
 }
 
@@ -159,20 +163,22 @@ t.test('runs chmod on given file (async)', t => {
     t.error(err, 'no error')
     const stat = fs.statSync(file)
     t.equal(stat.mode, parseInt('100741', 8))
-    didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '23', { chown: { uid: 42, gid: 43 } }, err => {
-      t.error(err, 'no error')
-    })
+    didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '23',
+      { chown: { uid: 42, gid: 43 } }, err => {
+        t.error(err, 'no error')
+      })
   })
 })
 
 t.test('run chmod AND chown (async)', t => {
   t.plan(3)
   const file = tmpFile()
-  didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '42', { mode: parseInt('741', 8), chown: { uid: 42, gid: 43 } }, err => {
-    t.error(err, 'no error')
-    const stat = fs.statSync(file)
-    t.equal(stat.mode, parseInt('100741', 8))
-  })
+  didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '42',
+    { mode: parseInt('741', 8), chown: { uid: 42, gid: 43 } }, err => {
+      t.error(err, 'no error')
+      const stat = fs.statSync(file)
+      t.equal(stat.mode, parseInt('100741', 8))
+    })
 })
 
 t.test('does not change chmod by default (async)', t => {
@@ -192,12 +198,14 @@ t.test('does not change chmod by default (async)', t => {
 t.test('does not change chown by default (async)', t => {
   t.plan(6)
   const file = tmpFile()
-  didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '42', { chown: { uid: 42, gid: 43 } }, _setModeOnly)
+  didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '42',
+    { chown: { uid: 42, gid: 43 } }, _setModeOnly)
 
   function _setModeOnly (err) {
     t.error(err, 'no error')
 
-    didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '43', { mode: parseInt('741', 8) }, _allDefault)
+    didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '43',
+      { mode: parseInt('741', 8) }, _allDefault)
   }
 
   function _allDefault (err) {
@@ -276,7 +284,8 @@ t.test('runs chmod on given file (sync)', t => {
 t.test('runs chown and chmod (sync)', t => {
   t.plan(2)
   const file = tmpFile()
-  didWriteFileAtomicSync(t, { uid: 42, gid: 43 }, file, '42', { mode: parseInt('741', 8), chown: { uid: 42, gid: 43 } })
+  didWriteFileAtomicSync(t, { uid: 42, gid: 43 }, file, '42',
+    { mode: parseInt('741', 8), chown: { uid: 42, gid: 43 } })
   const stat = fs.statSync(file)
   t.equal(stat.mode, parseInt('100741', 8))
 })
