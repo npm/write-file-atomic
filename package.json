@@ -2,7 +2,7 @@
   "name": "write-file-atomic",
   "version": "3.0.3",
   "description": "Write files in an atomic fashion w/configurable ownership",
-  "main": "index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "test": "tap",
     "posttest": "npm run lint",

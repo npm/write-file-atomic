@@ -70,7 +70,7 @@ const fs = {
   }
 }
 
-const writeFileAtomic = t.mock('../index', {
+const writeFileAtomic = t.mock('..', {
   fs: fs
 })
 

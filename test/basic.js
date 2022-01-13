@@ -8,7 +8,7 @@ let closeSyncCalled = 0
 const createErr = code => Object.assign(new Error(code), { code })
 
 let unlinked = []
-const writeFileAtomic = t.mock('../index', {
+const writeFileAtomic = t.mock('..', {
   fs: {
     realpath (filename, cb) {
       return cb(null, filename)
