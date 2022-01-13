@@ -85,12 +85,12 @@ test('ensure writes to the same file are serial', t => {
   const ops = 5 // count for how many concurrent write ops to request
   t.plan(ops * 3 + 3)
   fs.realpath = (...args) => {
-    t.false(fileInUse, 'file not in use')
+    t.notOk(fileInUse, 'file not in use')
     fileInUse = true
     oldRealPath(...args)
   }
   fs.rename = (...args) => {
-    t.true(fileInUse, 'file in use')
+    t.ok(fileInUse, 'file in use')
     fileInUse = false
     oldRename(...args)
   }
@@ -132,7 +132,7 @@ test('allow write to multiple files in parallel, but same file writes are serial
     })
     writeFileAtomic('test2', 'test', err => {
       opCount++
-      if (opCount === ops) t.true(wasParallel, 'parallel writes')
+      if (opCount === ops) t.ok(wasParallel, 'parallel writes')
 
       if (err) t.fail(err, 'wrote without error')
       else t.pass('wrote without error')
