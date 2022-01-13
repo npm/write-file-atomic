@@ -1,6 +1,5 @@
 'use strict'
-const { test } = require('tap')
-const requireInject = require('require-inject')
+const t = require('tap')
 
 let expectClose = 0
 let closeCalled = 0
@@ -9,7 +8,7 @@ let closeSyncCalled = 0
 const createErr = code => Object.assign(new Error(code), { code })
 
 let unlinked = []
-const writeFileAtomic = requireInject('../index', {
+const writeFileAtomic = t.mock('../index', {
   fs: {
     realpath (filename, cb) {
       return cb(null, filename)
@@ -101,7 +100,7 @@ const writeFileAtomic = requireInject('../index', {
 })
 const writeFileAtomicSync = writeFileAtomic.sync
 
-test('getTmpname', t => {
+t.test('getTmpname', t => {
   const getTmpname = writeFileAtomic._getTmpname
   const a = getTmpname('abc.def')
   const b = getTmpname('abc.def')
@@ -109,7 +108,7 @@ test('getTmpname', t => {
   t.end()
 })
 
-test('cleanupOnExit', t => {
+t.test('cleanupOnExit', t => {
   const file = 'tmpname'
   unlinked = []
   const cleanup = writeFileAtomic._cleanupOnExit(() => file)
@@ -121,7 +120,7 @@ test('cleanupOnExit', t => {
   t.end()
 })
 
-test('async tests', t => {
+t.test('async tests', t => {
   t.plan(2)
 
   expectClose = 0
@@ -210,7 +209,7 @@ test('async tests', t => {
   })
 })
 
-test('sync tests', t => {
+t.test('sync tests', t => {
   t.plan(2)
   closeSyncCalled = 0
   expectCloseSync = 0
@@ -329,7 +328,7 @@ test('sync tests', t => {
   })
 })
 
-test('promises', async t => {
+t.test('promises', async t => {
   let tmpfile
   closeCalled = 0
   expectClose = 0
