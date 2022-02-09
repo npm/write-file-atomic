@@ -8,9 +8,9 @@ updates:
     interval: daily
   allow:
     - dependency-type: direct
-  versioning-strategy: increase-if-necessary
+  versioning-strategy: increase
   commit-message:
     prefix: deps
     prefix-development: chore
   labels:
-    - "dependencies"
+    - "Dependencies"
