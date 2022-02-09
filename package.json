@@ -31,9 +31,7 @@
   "homepage": "https://github.com/npm/write-file-atomic",
   "dependencies": {
     "imurmurhash": "^0.1.4",
-    "is-typedarray": "^1.0.0",
-    "signal-exit": "^3.0.7",
-    "typedarray-to-buffer": "^4.0.0"
+    "signal-exit": "^3.0.7"
   },
   "devDependencies": {
     "@npmcli/template-oss": "^2.7.1",
