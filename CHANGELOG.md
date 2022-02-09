@@ -1,5 +1,18 @@
 # Changelog
 
+### [4.0.1](https://www.github.com/npm/write-file-atomic/compare/v4.0.0...v4.0.1) (2022-02-09)
+
+
+### Bug Fixes
+
+* remove dupl check for typed arrays ([#96](https://www.github.com/npm/write-file-atomic/issues/96)) ([81a296d](https://www.github.com/npm/write-file-atomic/commit/81a296df8cbed750bc8b41d2b0d725a6a16361f7))
+* remove is-typedarray and typedarray-to-buffer ([625526e](https://www.github.com/npm/write-file-atomic/commit/625526e1f190d2599a267839e995b768cf3f69b6))
+
+
+### Dependencies
+
+* update signal-exit requirement from ^3.0.2 to ^3.0.7 ([0b3ffdb](https://www.github.com/npm/write-file-atomic/commit/0b3ffdb4534b254ac5de8acf02e5b4591e2d92b4))
+
 ## [4.0.0](https://www.github.com/npm/write-file-atomic/compare/v3.0.3...v4.0.0) (2022-01-18)
 
 
