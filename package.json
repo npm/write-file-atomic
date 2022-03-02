@@ -34,7 +34,7 @@
     "signal-exit": "^3.0.7"
   },
   "devDependencies": {
-    "@npmcli/template-oss": "^2.8.1",
+    "@npmcli/template-oss": "^2.9.1",
     "mkdirp": "^1.0.4",
     "rimraf": "^3.0.2",
     "tap": "^15.1.6"
@@ -48,6 +48,6 @@
   },
   "templateOSS": {
     "windowsCI": false,
-    "version": "2.8.1"
+    "version": "2.9.1"
   }
 }
