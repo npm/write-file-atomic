@@ -11,8 +11,8 @@ function tmpFile () {
   return path.join(workdir, 'test-' + (++testfiles))
 }
 
-function readFile (path) {
-  return fs.readFileSync(path).toString()
+function readFile (p) {
+  return fs.readFileSync(p).toString()
 }
 
 function didWriteFileAtomic (t, expected, filename, data, options, callback) {
@@ -26,13 +26,13 @@ function didWriteFileAtomic (t, expected, filename, data, options, callback) {
   const actual = {}
   const writeFileAtomic = t.mock('..', {
     fs: Object.assign({}, fs, {
-      chown (filename, uid, gid, cb) {
+      chown (chownFilename, uid, gid, cb) {
         actual.uid = uid
         actual.gid = gid
         process.nextTick(cb)
       },
-      stat (filename, cb) {
-        fs.stat(filename, (err, stats) => {
+      stat (statFilename, cb) {
+        fs.stat(statFilename, (err, stats) => {
           if (err) {
             return cb(err)
           }
@@ -51,12 +51,12 @@ function didWriteFileAtomicSync (t, expected, filename, data, options) {
   const actual = {}
   const writeFileAtomic = t.mock('..', {
     fs: Object.assign({}, fs, {
-      chownSync (filename, uid, gid) {
+      chownSync (chownFilename, uid, gid) {
         actual.uid = uid
         actual.gid = gid
       },
-      statSync (filename) {
-        const stats = fs.statSync(filename)
+      statSync (statFilename) {
+        const stats = fs.statSync(statFilename)
         return Object.assign(stats, expected || {})
       },
     }),
@@ -164,8 +164,8 @@ t.test('runs chmod on given file (async)', t => {
     const stat = fs.statSync(file)
     t.equal(stat.mode, parseInt('100741', 8))
     didWriteFileAtomic(t, { uid: 42, gid: 43 }, file, '23',
-      { chown: { uid: 42, gid: 43 } }, err => {
-        t.error(err, 'no error')
+      { chown: { uid: 42, gid: 43 } }, chownErr => {
+        t.error(chownErr, 'no error')
       })
   })
 })
@@ -187,8 +187,8 @@ t.test('does not change chmod by default (async)', t => {
   didWriteFileAtomic(t, {}, file, '42', { mode: parseInt('741', 8) }, err => {
     t.error(err, 'no error')
 
-    didWriteFileAtomic(t, currentUser(), file, '43', err => {
-      t.error(err, 'no error')
+    didWriteFileAtomic(t, currentUser(), file, '43', writeFileError => {
+      t.error(writeFileError, 'no error')
       const stat = fs.statSync(file)
       t.equal(stat.mode, parseInt('100741', 8))
     })
