@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.0.0](https://github.com/npm/write-file-atomic/compare/v4.0.2...v5.0.0) (2022-10-10)
+
+### ⚠️ BREAKING CHANGES
+
+* `write-file-atomic` is now compatible with the following semver range for node: `^14.17.0 || ^16.13.0 || >=18.0.0`
+
+### Features
+
+* [`5506c07`](https://github.com/npm/write-file-atomic/commit/5506c076c0421ef2e4ddfc4ee5ed2be5adc809e7) [#122](https://github.com/npm/write-file-atomic/pull/122) postinstall for dependabot template-oss PR (@lukekarrys)
+
 ## [4.0.2](https://github.com/npm/write-file-atomic/compare/v4.0.1...v4.0.2) (2022-08-16)
 
 
