@@ -31,8 +31,8 @@
     "signal-exit": "^3.0.7"
   },
   "devDependencies": {
-    "@npmcli/eslint-config": "^4.0.0",
-    "@npmcli/template-oss": "4.11.3",
+    "@npmcli/eslint-config": "^4.0.0"
+    "@npmcli/template-oss": "4.12.0",
     "tap": "^16.0.1"
   },
   "files": [
@@ -45,7 +45,7 @@
   "templateOSS": {
     "//@npmcli/template-oss": "This file is partially managed by @npmcli/template-oss. Edits may be overwritten.",
     "windowsCI": false,
-    "version": "4.11.3"
+    "version": "4.12.0"
   },
   "tap": {
     "nyc-arg": [
