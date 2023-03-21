@@ -31,7 +31,7 @@
     "signal-exit": "^3.0.7"
   },
   "devDependencies": {
-    "@npmcli/eslint-config": "^4.0.0"
+    "@npmcli/eslint-config": "^4.0.0",
     "@npmcli/template-oss": "4.12.0",
     "tap": "^16.0.1"
   },
