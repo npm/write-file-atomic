@@ -2,8 +2,6 @@
 const fs = require('fs')
 const path = require('path')
 const t = require('tap')
-const mkdirp = require('mkdirp')
-const rimraf = require('rimraf')
 
 const workdir = path.join(__dirname, path.basename(__filename, '.js'))
 let testfiles = 0
@@ -73,8 +71,8 @@ function currentUser () {
 }
 
 t.test('setup', t => {
-  rimraf.sync(workdir)
-  mkdirp.sync(workdir)
+  fs.rmSync(workdir, { recursive: true, force: true })
+  fs.mkdirSync(workdir, { recursive: true })
   t.end()
 })
 
@@ -308,6 +306,6 @@ t.test('does not change chown by default (sync)', t => {
 })
 
 t.test('cleanup', t => {
-  rimraf.sync(workdir)
+  fs.rmSync(workdir, { recursive: true, force: true })
   t.end()
 })
