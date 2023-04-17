@@ -28,7 +28,7 @@
   "homepage": "https://github.com/npm/write-file-atomic",
   "dependencies": {
     "imurmurhash": "^0.1.4",
-    "signal-exit": "^3.0.7"
+    "signal-exit": "^4.0.1"
   },
   "devDependencies": {
     "@npmcli/eslint-config": "^4.0.0",
