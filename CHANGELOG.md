@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.0.1](https://github.com/npm/write-file-atomic/compare/v5.0.0...v5.0.1) (2023-04-26)
+
+### Dependencies
+
+* [`a0daf64`](https://github.com/npm/write-file-atomic/commit/a0daf642b441f3026de36f8d10dae24e46b34f01) [#157](https://github.com/npm/write-file-atomic/pull/157) bump signal-exit from 3.0.7 to 4.0.1 (#157)
+
 ## [5.0.0](https://github.com/npm/write-file-atomic/compare/v4.0.2...v5.0.0) (2022-10-10)
 
 ### ⚠️ BREAKING CHANGES
