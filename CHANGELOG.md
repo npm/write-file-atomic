@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.2](https://github.com/npm/write-file-atomic/compare/v5.0.1...v5.0.2) (2024-04-21)
+
+### Chores
+
+* [`1469e1a`](https://github.com/npm/write-file-atomic/commit/1469e1a1274b5341b87a2b6cba5b638f5f0304b7) [#193](https://github.com/npm/write-file-atomic/pull/193) postinstall for dependabot template-oss PR (@lukekarrys)
+* [`27ebf3c`](https://github.com/npm/write-file-atomic/commit/27ebf3c0f8733d7690715bb660f7af2297ced8e7) [#193](https://github.com/npm/write-file-atomic/pull/193) bump @npmcli/template-oss from 4.21.3 to 4.21.4 (@dependabot[bot])
+
 ## [5.0.1](https://github.com/npm/write-file-atomic/compare/v5.0.0...v5.0.1) (2023-04-26)
 
 ### Dependencies
