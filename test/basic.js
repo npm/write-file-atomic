@@ -85,10 +85,10 @@ const writeFileAtomic = t.mock('..', {
       }
       cb()
     },
-    realpathSync (filename, cb) {
+    realpathSync (filename) {
       return filename
     },
-    openSync (tmpfile, options) {
+    openSync (tmpfile) {
       if (/noopen/.test(tmpfile)) {
         throw createErr('ENOOPEN')
       }
@@ -105,10 +105,10 @@ const writeFileAtomic = t.mock('..', {
         throw createErr('ENOFSYNC')
       }
     },
-    closeSync (fd) {
+    closeSync () {
       closeSyncCalled++
     },
-    chownSync (tmpfile, uid, gid) {
+    chownSync (tmpfile) {
       if (/nochown/.test(tmpfile)) {
         throw createErr('ENOCHOWN')
       }
@@ -122,7 +122,7 @@ const writeFileAtomic = t.mock('..', {
         throw createErr('EPERM')
       }
     },
-    chmodSync (tmpfile, mode) {
+    chmodSync (tmpfile) {
       if (/nochmod/.test(tmpfile)) {
         throw createErr('ENOCHMOD')
       }
@@ -136,7 +136,7 @@ const writeFileAtomic = t.mock('..', {
         throw createErr('EPERM')
       }
     },
-    renameSync (tmpfile, filename) {
+    renameSync (tmpfile) {
       if (/norename/.test(tmpfile)) {
         throw createErr('ENORENAME')
       }
@@ -412,7 +412,7 @@ t.test('promises', async t => {
   t.match(tmpfile, /^good\.\d+$/, 'tmpfileCreated is called for success')
 
   await writeFileAtomic('good', 'test', {
-    tmpfileCreated (gottmpfile) {
+    tmpfileCreated () {
       return Promise.resolve()
     },
   })
