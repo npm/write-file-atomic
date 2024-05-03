@@ -57,10 +57,10 @@ const fs = {
     }
     cb()
   },
-  realpathSync (filename, cb) {
+  realpathSync (filename) {
     return filename
   },
-  openSync (tmpfile, options) {
+  openSync (tmpfile) {
     if (/noopen/.test(tmpfile)) {
       throw new Error('ENOOPEN')
     }
@@ -77,17 +77,17 @@ const fs = {
     }
   },
   closeSync () { },
-  chownSync (tmpfile, uid, gid) {
+  chownSync (tmpfile) {
     if (/nochown/.test(tmpfile)) {
       throw new Error('ENOCHOWN')
     }
   },
-  chmodSync (tmpfile, mode) {
+  chmodSync (tmpfile) {
     if (/nochmod/.test(tmpfile)) {
       throw new Error('ENOCHMOD')
     }
   },
-  renameSync (tmpfile, filename) {
+  renameSync (tmpfile) {
     if (/norename/.test(tmpfile)) {
       throw new Error('ENORENAME')
     }
