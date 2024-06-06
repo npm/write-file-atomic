@@ -33,7 +33,7 @@
   "devDependencies": {
     "@npmcli/eslint-config": "^4.0.0",
     "@npmcli/template-oss": "4.22.0",
-    "tap": "^16.0.1"
+    "tap": "^19.2.1"
   },
   "files": [
     "bin/",
