@@ -32,7 +32,7 @@
     "signal-exit": "^4.0.1"
   },
   "devDependencies": {
-    "@npmcli/eslint-config": "^4.0.0",
+    "@npmcli/eslint-config": "^5.0.0",
     "@npmcli/template-oss": "4.23.3",
     "tap": "^16.0.1"
   },
