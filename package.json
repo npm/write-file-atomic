@@ -1,6 +1,6 @@
 {
   "name": "write-file-atomic",
-  "version": "5.0.1",
+  "version": "6.0.0",
   "description": "Write files in an atomic fashion w/configurable ownership",
   "main": "./lib/index.js",
   "scripts": {

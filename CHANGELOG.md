@@ -1,5 +1,18 @@
 # Changelog
 
+## [6.0.0](https://github.com/npm/write-file-atomic/compare/v5.0.1...v6.0.0) (2024-09-24)
+### ⚠️ BREAKING CHANGES
+* `write-file-atomic` now supports node `^18.17.0 || >=20.5.0`
+### Bug Fixes
+* [`e4db381`](https://github.com/npm/write-file-atomic/commit/e4db381db11ad66e2eba47a801b5fe279923057f) [#208](https://github.com/npm/write-file-atomic/pull/208) align to npm 10 node engine range (@hashtagchris)
+### Chores
+* [`384ec4c`](https://github.com/npm/write-file-atomic/commit/384ec4c4008cf66b9863999c7b4e0554109968bc) [#208](https://github.com/npm/write-file-atomic/pull/208) run template-oss-apply (@hashtagchris)
+* [`1a8883d`](https://github.com/npm/write-file-atomic/commit/1a8883d94a97bef3addf7d77300720f3aacfabbe) [#206](https://github.com/npm/write-file-atomic/pull/206) bump @npmcli/eslint-config from 4.0.5 to 5.0.0 (@dependabot[bot])
+* [`73bddd9`](https://github.com/npm/write-file-atomic/commit/73bddd9db182f7a9ec1475a311c57844b4b3f05f) [#194](https://github.com/npm/write-file-atomic/pull/194) linting: no-unused-vars (@lukekarrys)
+* [`4a16903`](https://github.com/npm/write-file-atomic/commit/4a169033af04227a898ac14cd90b3358a8d4d37e) [#194](https://github.com/npm/write-file-atomic/pull/194) bump @npmcli/template-oss to 4.22.0 (@lukekarrys)
+* [`944e6c2`](https://github.com/npm/write-file-atomic/commit/944e6c2e9d01389514b540e4effa4cc1d786510a) [#207](https://github.com/npm/write-file-atomic/pull/207) postinstall for dependabot template-oss PR (@hashtagchris)
+* [`c2c17b7`](https://github.com/npm/write-file-atomic/commit/c2c17b7a9297215cde6bb3c80691563193b986d3) [#207](https://github.com/npm/write-file-atomic/pull/207) bump @npmcli/template-oss from 4.23.1 to 4.23.3 (@dependabot[bot])
+
 ## [5.0.1](https://github.com/npm/write-file-atomic/compare/v5.0.0...v5.0.1) (2023-04-26)
 
 ### Dependencies
