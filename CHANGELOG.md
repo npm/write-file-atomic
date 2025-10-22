@@ -1,5 +1,14 @@
 # Changelog
 
+## [7.0.0](https://github.com/npm/write-file-atomic/compare/v6.0.0...v7.0.0) (2025-10-22)
+### ⚠️ BREAKING CHANGES
+* `write-file-atomic` now supports node `^20.17.0 || >=22.9.0`
+### Bug Fixes
+* [`05b67bd`](https://github.com/npm/write-file-atomic/commit/05b67bd54e8c7966619bd07a0d2eaca81261e034) [#219](https://github.com/npm/write-file-atomic/pull/219) align to npm 11 node engine range (#219) (@owlstronaut)
+### Chores
+* [`52d789d`](https://github.com/npm/write-file-atomic/commit/52d789d21905b83bcb3b93c7cd2750cdc82becc6) [#212](https://github.com/npm/write-file-atomic/pull/212) postinstall workflow updates (#212) (@owlstronaut)
+* [`602f2ad`](https://github.com/npm/write-file-atomic/commit/602f2ad71ce4e08357286aa06a2619ce1746f12b) [#218](https://github.com/npm/write-file-atomic/pull/218) bump @npmcli/template-oss from 4.26.0 to 4.27.1 (#218) (@dependabot[bot], @npm-cli-bot)
+
 ## [6.0.0](https://github.com/npm/write-file-atomic/compare/v5.0.1...v6.0.0) (2024-09-24)
 ### ⚠️ BREAKING CHANGES
 * `write-file-atomic` now supports node `^18.17.0 || >=20.5.0`
