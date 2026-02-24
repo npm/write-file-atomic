@@ -105,7 +105,7 @@ const fs = {
 }
 
 const writeFileAtomic = t.mock('..', {
-  fs: fs,
+  'graceful-fs': fs,
 })
 
 // preserve original functions

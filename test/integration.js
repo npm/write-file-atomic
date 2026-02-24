@@ -23,7 +23,7 @@ function didWriteFileAtomic (t, expected, filename, data, options, callback) {
   }
   const actual = {}
   const writeFileAtomic = t.mock('..', {
-    fs: Object.assign({}, fs, {
+    'graceful-fs': Object.assign({}, fs, {
       chown (chownFilename, uid, gid, cb) {
         actual.uid = uid
         actual.gid = gid
@@ -48,7 +48,7 @@ function didWriteFileAtomic (t, expected, filename, data, options, callback) {
 function didWriteFileAtomicSync (t, expected, filename, data, options) {
   const actual = {}
   const writeFileAtomic = t.mock('..', {
-    fs: Object.assign({}, fs, {
+    'graceful-fs': Object.assign({}, fs, {
       chownSync (chownFilename, uid, gid) {
         actual.uid = uid
         actual.gid = gid

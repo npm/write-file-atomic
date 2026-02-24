@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/npm/write-file-atomic",
   "dependencies": {
+    "graceful-fs": "^4.2.11",
     "signal-exit": "^4.0.1"
   },
   "devDependencies": {
