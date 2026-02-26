@@ -1,5 +1,14 @@
 # Changelog
 
+## [7.0.1](https://github.com/npm/write-file-atomic/compare/v7.0.0...v7.0.1) (2026-02-26)
+### Bug Fixes
+* [`da246ef`](https://github.com/npm/write-file-atomic/commit/da246ef6b911f75c236070193eca823df7b9969f) [#229](https://github.com/npm/write-file-atomic/pull/229) use node:crypto instead of imurmurhash (@owlstronaut)
+### Dependencies
+* [`727e92c`](https://github.com/npm/write-file-atomic/commit/727e92c836515816e454919b526162490a9a9524) [#229](https://github.com/npm/write-file-atomic/pull/229) remove imurmurhash
+### Chores
+* [`4785863`](https://github.com/npm/write-file-atomic/commit/47858631168a63da5415c57d3538cb567d9b6035) [#221](https://github.com/npm/write-file-atomic/pull/221) bump @npmcli/eslint-config from 5.1.0 to 6.0.0 (#221) (@dependabot[bot])
+* [`0c819a3`](https://github.com/npm/write-file-atomic/commit/0c819a347cada1c54065d41410cf683bc60ce3c5) [#223](https://github.com/npm/write-file-atomic/pull/223) bump @npmcli/template-oss from 4.28.0 to 4.28.1 (#223) (@dependabot[bot], @npm-cli-bot)
+
 ## [7.0.0](https://github.com/npm/write-file-atomic/compare/v6.0.0...v7.0.0) (2025-10-22)
 ### ⚠️ BREAKING CHANGES
 * `write-file-atomic` now supports node `^20.17.0 || >=22.9.0`
