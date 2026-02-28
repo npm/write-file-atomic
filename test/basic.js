@@ -9,7 +9,7 @@ const createErr = code => Object.assign(new Error(code), { code })
 
 let unlinked = []
 const writeFileAtomic = t.mock('..', {
-  fs: {
+  'graceful-fs': {
     realpath (filename, cb) {
       return cb(null, filename)
     },
