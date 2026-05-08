@@ -1,5 +1,16 @@
 # Changelog
 
+## [8.0.0](https://github.com/npm/write-file-atomic/compare/v7.0.1...v8.0.0) (2026-05-08)
+### ⚠️ BREAKING CHANGES
+* `write-file-atomic` now supports node `^22.22.2 || ^24.15.0 || >=26.0.0`
+* template-oss-apply
+### Features
+* [`505f017`](https://github.com/npm/write-file-atomic/commit/505f017efd4fac9fa1afe3f1a4544f4234d39bfd) [#233](https://github.com/npm/write-file-atomic/pull/233) bump to new node engine range (@owlstronaut)
+* [`0843a3a`](https://github.com/npm/write-file-atomic/commit/0843a3ad9e4af8c1e5d4e5c475e29a3cbbb65006) [#233](https://github.com/npm/write-file-atomic/pull/233) template-oss-apply (@owlstronaut)
+### Chores
+* [`8fa39f9`](https://github.com/npm/write-file-atomic/commit/8fa39f99b1c431a9c6d4195e52f9d811ca33fcf4) [#233](https://github.com/npm/write-file-atomic/pull/233) template-oss-apply (@owlstronaut)
+* [`26b9d79`](https://github.com/npm/write-file-atomic/commit/26b9d79d52ce982e282ecfbba3dd8e7d6b0940f5) [#231](https://github.com/npm/write-file-atomic/pull/231) bump @npmcli/template-oss from 4.29.0 to 4.30.0 (#231) (@dependabot[bot], @npm-cli-bot)
+
 ## [7.0.1](https://github.com/npm/write-file-atomic/compare/v7.0.0...v7.0.1) (2026-02-26)
 ### Bug Fixes
 * [`da246ef`](https://github.com/npm/write-file-atomic/commit/da246ef6b911f75c236070193eca823df7b9969f) [#229](https://github.com/npm/write-file-atomic/pull/229) use node:crypto instead of imurmurhash (@owlstronaut)
