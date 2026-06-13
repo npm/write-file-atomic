@@ -1,4 +1,6 @@
 'use strict'
+const fs = require('fs')
+const path = require('path')
 const t = require('tap')
 
 let expectClose = 0
@@ -174,6 +176,22 @@ t.test('cleanupOnExit', t => {
   t.doesNotThrow(cleanup2, 'exceptions are caught')
   unlinked = []
   t.end()
+})
+
+t.test('handles onExit without remove handler', async t => {
+  const writeFileAtomicNoExitRemove = t.mock('..', {
+    'signal-exit': {
+      onExit: () => undefined,
+    },
+  })
+  const dir = t.testdir()
+  const file = path.join(dir, 'file')
+
+  await writeFileAtomicNoExitRemove(file, 'async')
+  t.equal(fs.readFileSync(file, 'utf8'), 'async')
+
+  t.doesNotThrow(() => writeFileAtomicNoExitRemove.sync(file, 'sync'))
+  t.equal(fs.readFileSync(file, 'utf8'), 'sync')
 })
 
 t.test('async tests', t => {
