@@ -305,6 +305,34 @@ t.test('does not change chown by default (sync)', t => {
   didWriteFileAtomicSync(t, { uid: 42, gid: 43 }, file, '44')
 })
 
+t.test('writes a file at the filesystem name length limit (sync)', t => {
+  const writeFileAtomic = require('..')
+  const file = path.join(workdir, 'x'.repeat(255))
+  let tmpfile
+  writeFileAtomic.sync(file, '42', {
+    tmpfileCreated (tmp) {
+      tmpfile = tmp
+    },
+  })
+  t.equal(path.basename(tmpfile).length, 255, 'tmp basename is no longer than the target')
+  t.equal(readFile(file), '42', 'content ok')
+  t.end()
+})
+
+t.test('writes a file at the filesystem name length limit (async)', t => {
+  const writeFileAtomic = require('..')
+  const file = path.join(workdir, 'y'.repeat(255))
+  writeFileAtomic(file, '43', {
+    tmpfileCreated (tmpfile) {
+      t.equal(path.basename(tmpfile).length, 255, 'tmp basename is no longer than the target')
+    },
+  }, err => {
+    t.error(err, 'no error')
+    t.equal(readFile(file), '43', 'content ok')
+    t.end()
+  })
+})
+
 t.test('cleanup', t => {
   fs.rmSync(workdir, { recursive: true, force: true })
   t.end()

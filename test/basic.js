@@ -161,6 +161,19 @@ t.test('getTmpname', t => {
   const a = getTmpname('abc.def')
   const b = getTmpname('abc.def')
   t.not(a, b, 'different invocations of getTmpname get different results')
+  t.match(a, /^abc\.def\.\d+$/, 'short names keep an appended unique suffix')
+
+  const longBase = 'a'.repeat(255)
+  const longFile = '/tmp/' + longBase
+  const longTmp = getTmpname(longFile)
+  t.equal(
+    longTmp.length,
+    longFile.length,
+    'tmp path is no longer than the destination when the basename is already long'
+  )
+  t.equal(longTmp.slice(0, '/tmp/'.length), '/tmp/', 'tmp stays in the destination directory')
+  t.match(longTmp, /\.\d+$/, 'tmp still ends with a unique numeric suffix')
+  t.not(getTmpname(longFile), longTmp, 'long names still get unique tmp names')
   t.end()
 })
 
@@ -226,7 +239,7 @@ t.test('async tests', t => {
     writeFileAtomic('norename', 'test', err => {
       t.equal(err && err.message, 'ENORENAME', 'Rename errors propagate')
     })
-    writeFileAtomic('norename nounlink', 'test', err => {
+    writeFileAtomic('norename nounlink ' + 'x'.repeat(32), 'test', err => {
       t.equal(err && err.message, 'ENORENAME',
         'Failure to unlink the temp file does not clobber the original error')
     })
@@ -352,7 +365,7 @@ t.test('sync tests', t => {
     })
     throws(t, 'ENORENAME',
       'Failure to unlink the temp file does not clobber the original error', () => {
-        writeFileAtomicSync('norename nounlink', 'test')
+        writeFileAtomicSync('norename nounlink ' + 'x'.repeat(32), 'test')
       })
     throws(t, 'ENOFSYNC', 'Fsync errors propagate', () => {
       writeFileAtomicSync('nofsync', 'test')
