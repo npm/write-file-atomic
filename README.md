@@ -31,7 +31,7 @@ var writeFileAtomic = require('write-file-atomic')
 writeFileAtomic(filename, data, [options], [callback])
 ```
 
-The file is initially written to a temporary name in the same directory. That name is the destination plus a unique numeric suffix from a hash of this module's path, `process.pid`, worker `threadId` (when running in a worker thread), and an invocation counter. If appending the suffix would make the tmpfile basename longer than the destination basename, the suffix replaces the end of the basename instead, so a destination name that is legal on the filesystem cannot produce `ENAMETOOLONG` for the tmpfile.
+The file is initially written to a temporary name in the same directory. That name is the destination plus a unique numeric suffix from a hash of this module's path, `process.pid`, worker `threadId` (when running in a worker thread), and an invocation counter. If the destination basename is longer than 11 characters (the longest `'.'`+uint32 suffix), the suffix replaces the end of the basename instead, so a destination name that is legal on the filesystem cannot produce `ENAMETOOLONG` for the tmpfile.
 If writeFile completes successfully then, if passed the **chown** option it will change
 the ownership of the file. Finally it renames the file back to the filename you specified. If
 it encounters errors at any of these steps it will attempt to unlink the temporary file and then
