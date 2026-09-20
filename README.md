@@ -34,8 +34,11 @@ writeFileAtomic(filename, data, [options], [callback])
 The file is initially named `filename + "." + murmurhex(__filename, process.pid, ++invocations)`.
 Note that `require('worker_threads').threadId` is used in addition to `process.pid` if running inside of a worker thread.
 If writeFile completes successfully then, if passed the **chown** option it will change
-the ownership of the file. Finally it renames the file back to the filename you specified. If
-it encounters errors at any of these steps it will attempt to unlink the temporary file and then
+the ownership of the file. Finally it renames the file back to the filename you specified.
+If that rename fails with `EXDEV` (cross-device link, including Windows AppX virtualized
+paths), the write falls back to copying the temp file over the destination and removing
+the temp file. That fallback is not atomic.
+If it encounters errors at any of these steps it will attempt to unlink the temporary file and then
 pass the error back to the caller.
 If multiple writes are concurrently issued to the same file, the write operations are put into a queue and serialized in the order they were called, using Promises. Writes to different files are still executed in parallel.
 
