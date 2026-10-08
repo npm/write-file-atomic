@@ -33,6 +33,8 @@ writeFileAtomic(filename, data, [options], [callback])
 
 The file is initially named `filename + "." + murmurhex(__filename, process.pid, ++invocations)`.
 Note that `require('worker_threads').threadId` is used in addition to `process.pid` if running inside of a worker thread.
+If this temporary name exceeds a filesystem limit, a short random name in the same
+directory is created exclusively instead. `tmpfileCreated` receives the actual temporary path.
 If writeFile completes successfully then, if passed the **chown** option it will change
 the ownership of the file. Finally it renames the file back to the filename you specified. If
 it encounters errors at any of these steps it will attempt to unlink the temporary file and then
