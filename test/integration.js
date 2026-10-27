@@ -2,6 +2,19 @@
 const fs = require('fs')
 const path = require('path')
 const t = require('tap')
+const writeAtomic = require('..')
+
+function arrayBufferViews () {
+  const bytes = Uint8Array.from({ length: 16 }, (_, i) => i)
+  return [
+    new Uint16Array(bytes.buffer, 2, 2),
+    new Uint32Array(bytes.buffer, 4, 2),
+    Buffer.from(bytes.buffer, 3, 5),
+    bytes.subarray(3, 8),
+    new DataView(bytes.buffer, 3, 5),
+    new Uint16Array(bytes.buffer, 4, 0),
+  ]
+}
 
 const workdir = path.join(__dirname, path.basename(__filename, '.js'))
 let testfiles = 0
@@ -110,6 +123,17 @@ t.test('writes TypedArray to simple file (async)', t => {
     t.error(err, 'no error')
     t.equal(readFile(file), '42', 'content ok')
   })
+})
+
+t.test('writes complete ArrayBuffer views (async)', async t => {
+  for (const data of arrayBufferViews()) {
+    const file = tmpFile()
+    await writeAtomic(file, data)
+    const actual = fs.readFileSync(file)
+    t.equal(actual.length, data.byteLength, `${data.constructor.name} byte length`)
+    t.same(actual, Buffer.from(data.buffer, data.byteOffset, data.byteLength),
+      `${data.constructor.name} contains only the view bytes at offset ${data.byteOffset}`)
+  }
 })
 
 t.test('writes undefined to simple file (async)', t => {
@@ -243,6 +267,18 @@ t.test('writes simple TypedArray file (sync)', t => {
   const file = tmpFile()
   didWriteFileAtomicSync(t, {}, file, new Uint8Array([0x34, 0x32]))
   t.equal(readFile(file), '42')
+})
+
+t.test('writes complete ArrayBuffer views (sync)', t => {
+  for (const data of arrayBufferViews()) {
+    const file = tmpFile()
+    writeAtomic.sync(file, data)
+    const actual = fs.readFileSync(file)
+    t.equal(actual.length, data.byteLength, `${data.constructor.name} byte length`)
+    t.same(actual, Buffer.from(data.buffer, data.byteOffset, data.byteLength),
+      `${data.constructor.name} contains only the view bytes at offset ${data.byteOffset}`)
+  }
+  t.end()
 })
 
 t.test('writes undefined file (sync)', t => {

@@ -6,6 +6,19 @@ let closeCalled = 0
 let expectCloseSync = 0
 let closeSyncCalled = 0
 const createErr = code => Object.assign(new Error(code), { code })
+const writeCalls = []
+
+function arrayBufferViews () {
+  const bytes = Uint8Array.from({ length: 16 }, (_, i) => i)
+  return [
+    new Uint16Array(bytes.buffer, 2, 2),
+    new Uint32Array(bytes.buffer, 4, 2),
+    Buffer.from(bytes.buffer, 3, 5),
+    bytes.subarray(3, 8),
+    new DataView(bytes.buffer, 3, 5),
+    new Uint16Array(bytes.buffer, 4, 0),
+  ]
+}
 
 let unlinked = []
 const writeFileAtomic = t.mock('..', {
@@ -20,7 +33,8 @@ const writeFileAtomic = t.mock('..', {
       expectClose++
       cb(null, tmpfile)
     },
-    write (fd) {
+    write (fd, data, offset, length, position) {
+      writeCalls.push([data, offset, length, position])
       const cb = arguments[arguments.length - 1]
       if (/nowrite/.test(fd)) {
         return cb(createErr('ENOWRITE'))
@@ -95,7 +109,8 @@ const writeFileAtomic = t.mock('..', {
       expectCloseSync++
       return tmpfile
     },
-    writeSync (fd) {
+    writeSync (fd, data, offset, length, position) {
+      writeCalls.push([data, offset, length, position])
       if (/nowrite/.test(fd)) {
         throw createErr('ENOWRITE')
       }
@@ -175,6 +190,22 @@ t.test('cleanupOnExit', t => {
   unlinked = []
   t.end()
 })
+
+for (const sync of [false, true]) {
+  t.test(`passes view byte lengths to fs.write${sync ? 'Sync' : ''}`, async t => {
+    for (const data of arrayBufferViews()) {
+      const callsBefore = writeCalls.length
+      if (sync) {
+        writeFileAtomicSync('good', data)
+      } else {
+        await writeFileAtomic('good', data)
+      }
+      t.equal(writeCalls.length, callsBefore + 1, 'calls fs once per view')
+      t.same(writeCalls[writeCalls.length - 1], [data, 0, data.byteLength, 0],
+        `${data.constructor.name} at offset ${data.byteOffset} uses byte length`)
+    }
+  })
+}
 
 t.test('async tests', t => {
   t.plan(2)
