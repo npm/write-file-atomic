@@ -305,6 +305,24 @@ t.test('does not change chown by default (sync)', t => {
   didWriteFileAtomicSync(t, { uid: 42, gid: 43 }, file, '44')
 })
 
+t.test('reused options keep each file mode', t => {
+  t.plan(4)
+  const publicFile = tmpFile()
+  const secretFile = tmpFile()
+  fs.writeFileSync(publicFile, 'a', { mode: 0o644 })
+  fs.writeFileSync(secretFile, 'b', { mode: 0o600 })
+  const options = { encoding: 'utf8' }
+  const writeFileAtomic = require('..')
+  writeFileAtomic(publicFile, 'hello', options, err => {
+    t.error(err, 'no error')
+    writeFileAtomic(secretFile, 'token', options, writeErr => {
+      t.error(writeErr, 'no error')
+      t.equal(fs.statSync(secretFile).mode & 0o777, 0o600, 'secret keeps its mode')
+      t.strictSame(options, { encoding: 'utf8' }, 'caller options are unchanged')
+    })
+  })
+})
+
 t.test('cleanup', t => {
   fs.rmSync(workdir, { recursive: true, force: true })
   t.end()
